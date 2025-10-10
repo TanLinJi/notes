@@ -1,0 +1,31 @@
+SeqName CPMG
+sf(MHz) 2
+o1(Hz) 240046.17
+ID 16803
+UserID 2
+STID 100
+SeqID 3
+SampleTime 2023/12/28 16:13:25
+Note cpmg_pw_8
+P1(us) 6.52
+P2(us) 10.48
+TD 266664
+SW(KHz) 333.333
+TW(ms) 1500
+RFD(ms) 0.002
+RG1(db) 10
+DRG1 3
+NS 2
+TE(ms) 0.3
+NECH 1024
+RFA1(%) 100
+DL2(ms) 0.02076
+DR 1
+PRG 1
+PhaseCount 1
+PeakOffset(ms) 0
+DTime(ms) 0.012
+DL31(ms) 0.001
+DL12(ms) 0.05552
+SegTD 
+D3V0 (us) 60
