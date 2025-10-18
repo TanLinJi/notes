@@ -1455,7 +1455,461 @@
 
   python在遇到多个名字相同的变量或函数时，会覆盖，而不是分别导入不同的函数
 
-## 
+## 第11章 类
+
+### 11.1 类的创建的基本使用
+
+- 创建一个类
+
+  ```Python
+  class Dog():
+      ''' 文档字符串：这是一次模拟小狗的简单尝试 '''
+      def __init__(self,name,age):
+          self.name = name
+          self.age = age
+      
+      def sit(self):
+          print(self.name.title() + " is now sitting.")
+      
+      def rollover(self):
+          print(self.name.title() + " is now rolling over!")
+  ```
+
+  Dog()类中包含两个属性：name 和 age ，以及两个方法 sit() 和 rollover()。类中的函数称为方法，可以通过实例访问到的变量称为属性
+
+  - `__init__()`方法，前后各有两个下划线，这是一个特殊的方法，在根据Dog()类创建实例时，python都会自动运行这个方法。
+    - 这个方法中，形参 self 必须有，而且必须位于其他所有参数的前边，因为python在调用`__init__()`创建实例时，将自动传入实参 self
+    - 每个与类相关联的方法调用都自动传入实参 self ，它是只想实例本身的引用，让实例能够访问到类中的属性和方法
+    - 通过实参向 Dog() 传递 name 和 age 时，self会自动传递，因此不用自己传递它，只用给出后边两个实参
+  - 以 self 为前缀的变量可以供类中的所有方法使用，而且还可以通过类的任何实例来访问这些变量
+  - `self.name = name` 获取存储在形参 name 中的值，并将其存储在 name 变量中，然后将该变量关联到当前创建的实例
+  - sit() 和 rollover() 方法不需要其他信息，因此只有一个形参 self
+  - 类名通常是首字母大写，实例是小写
+
+- 创建类的实例，根据类来创建对象称为实例化
+
+  ```Python
+  class Dog():
+      ''' 文档字符串：这是一次模拟小狗的简单尝试 '''
+      def __init__(self,name,age):
+          self.name = name
+          self.age = age
+      
+      def sit(self):
+          print(self.name.title() + " is now sitting.")
+      
+      def rollover(self):
+          print(self.name.title() + " is now rolling over!")
+  
+  my_dog = Dog('whill', 6)
+  print("My dog's name is " + my_dog.name.title())   # 访问属性通过 句点表示法
+  print("My dog's age is " , my_dog.age)
+  
+  my_dog.sit()
+  my_dog.rollover()  # 访问方法通过 句点表示法
+  ```
+
+
+
+### 11.2 使用类和实例
+
+- Car类
+
+  ```Python
+  class Car():
+      '''一次模拟汽车的简单尝试'''
+      
+      def __init__(self,make,model,year):
+          '''初始化描述汽车的属性'''
+          self.make = make
+          self.model = model
+          self.year = year
+      
+      def get_descriptive_name(self):
+          long_name = str(self.year) + " " + self.make + " " + self.model
+          return long_name
+      
+  my_new_car = Car("Audi", 'a6', 2016)
+  print(my_new_car.get_descriptive_name())
+  ```
+
+- 给属性指定默认值
+
+  类的每个属性都必须有初始值，可以在`__init__()`方法内指定属性的初始值，此时无需包含为它提供初始值的形参
+
+  ```Python
+  class Car():
+      '''一次模拟汽车的简单尝试'''
+      
+      def __init__(self,make,model,year):
+          '''初始化描述汽车的属性'''
+          self.make = make
+          self.model = model
+          self.year = year
+          self.odometer_reading = 0   # 为odometer_reading属性设置的初始值，不用再在形参中给出
+      
+      def get_descriptive_name(self):
+          long_name = str(self.year) + " " + self.make + " " + self.model
+          return long_name
+      
+      def read_odometer(self):
+          '''打印汽车总里程'''
+          print("Total odometer: " + str(self.odometer_reading) + " miles. ")
+  
+  my_new_car = Car("Audi", 'a6', 2016)
+  print(my_new_car.get_descriptive_name())
+  my_new_car.read_odometer()
+  ```
+
+- 修改属性的值
+
+  ```Python
+  # 法一 通过实例直接访问它(不安全)
+  my_new_car = Car("Audi", 'a6', 2016)
+  my_new_car.odometer_reading = 23
+  my_new_car.read_odometer()
+  ```
+
+  ```Python
+  class Car():
+      '''一次模拟汽车的简单尝试'''
+      --snip--
+      
+  	def update_odometer(self,mileage):
+          '''
+          将里程表修改为指定的值
+          静止将里程表读数往回调
+          '''
+          if mileage > self.odometer_reading:
+              self.odometer_reading = mileage
+          else:
+              print("不允许作弊.")
+  my_new_car = Car("Audi", 'a6', 2016)
+  my_new_car.update_odometer(23)
+  my_new_car.read_odometer()
+  ```
+
+- 通过方法对属性的值进行递增
+
+  ```Python
+  class Car():
+      '''一次模拟汽车的简单尝试'''
+      
+      def __init__(self,make,model,year):
+          '''初始化描述汽车的属性'''
+          self.make = make
+          self.model = model
+          self.year = year
+          self.odometer_reading = 0   # 为odometer_reading属性设置的初始值，不用再在形参中给出
+      
+      
+      def get_descriptive_name(self):
+          long_name = str(self.year) + " " + self.make + " " + self.model
+          return long_name
+      
+      
+      def read_odometer(self):
+          '''打印汽车总里程'''
+          print("Total odometer: " + str(self.odometer_reading) + " miles. ")
+      
+          
+      def update_odometer(self,mileage):
+          '''
+          将里程表修改为指定的值
+          静止将里程表读数往回调
+          '''
+          if mileage > self.odometer_reading:
+              self.odometer_reading = mileage
+          else:
+              print("不允许作弊.")
+      
+      
+      def increment_odometer(self,miles):
+          if miles > 0:
+          	self.odometer_reading += miles
+          else:
+          	print("不允许作弊.")
+      
+  used_car = Car("Audi",'a7',2019)
+  print(used_car.get_descriptive_name())
+  
+  used_car.update_odometer(2650)
+  used_car.read_odometer()
+  
+  used_car.increment_odometer(3000)
+  used_car.read_odometer()
+  ```
+
+### 11.3 继承
+
+- 一个类继承一个类时，它将自动获得被继承类的所有属性和方法，原有的类称为父类或超类，新类称为子类
+
+  ```Python
+  class Car():
+      '''一次模拟汽车的简单尝试'''
+      
+      def __init__(self,make,model,year):
+          '''初始化描述汽车的属性'''
+          self.make = make
+          self.model = model
+          self.year = year
+          self.odometer_reading = 0   # 为odometer_reading属性设置的初始值，不用再在形参中给出
+      
+      
+      def get_descriptive_name(self):
+          long_name = str(self.year) + " " + self.make + " " + self.model
+          return long_name
+      
+      
+      def read_odometer(self):
+          '''打印汽车总里程'''
+          print("Total odometer: " + str(self.odometer_reading) + " miles. ")
+      
+          
+      def update_odometer(self,mileage):
+          '''
+          将里程表修改为指定的值
+          静止将里程表读数往回调
+          '''
+          if mileage > self.odometer_reading:
+              self.odometer_reading = mileage
+          else:
+              print("不允许作弊.")
+      
+      
+      def increment_odometer(self,miles):
+          if miles > 0:
+          	self.odometer_reading += miles
+          else:
+          	print("不允许作弊.")
+              
+  
+  class ElectricCar(Car):
+      '''继承了类 Car'''
+      def __init__(self,make,model,year):
+          '''初始化父类的属性'''
+          super().__init__(make,model,year)
+          
+  my_tesla = ElectricCar("tesla",'model y', 2018)
+  print(my_tesla.get_descriptive_name())
+  ```
+
+- 创建子类时，父类必须包含在当前文件中，而且必须子类的前边
+
+- 定义子类时，在括号内指定父类的名称`class ElectricCar(Car):`
+
+- `super()`是特殊的函数，使父类和子类关联起来
+
+- 给子类定义自己的特有属性和方法：
+
+  ```Python
+  class Car():
+  	---snip---
+      
+  class ElectricCar(Car):
+      '''继承了类 Car'''
+      def __init__(self,make,model,year):
+          # 初始化父类的属性
+          super().__init__(make,model,year) 
+          # 初始化自己特有的属性
+          self.batery_size = 70
+          
+      def describe_battery(self):
+          print("This car has a " + str(self.batery_size) + '-kWh battery.')
+  
+  my_tesla = ElectricCar("tesla",'model y', 2018)
+  print(my_tesla.get_descriptive_name())
+  my_tesla.describe_battery()
+  ```
+
+- 重写父类的方法（定义一个和父类方法重名的方法）
+
+  ```Python
+  class Car():
+      ---snip---
+      def fill_gas_tank(self):
+          '''加油的方法'''
+          print("加油中...")
+          print("加油完成！")
+          
+  class ElectricCar(Car):
+      def __init__(self,make,model,year):
+          super().__init__(make,model,year)
+          
+      def fill_gas_tank(self):
+          '''重写父类方法，电动车没有油箱'''
+          print("This car doesn't need a gas tank.")
+  ```
+
+  重写父类方法后，在创建子类的实例时，Python会忽略掉原来父类中的方法
+
+- 将实例用作属性
+
+  ```Python
+  class Car():
+      '''一次模拟汽车的简单尝试'''
+      
+      def __init__(self,make,model,year):
+          '''初始化描述汽车的属性'''
+          self.make = make
+          self.model = model
+          self.year = year
+          self.odometer_reading = 0   # 为odometer_reading属性设置的初始值，不用再在形参中给出
+      
+      
+      def get_descriptive_name(self):
+          long_name = str(self.year) + " " + self.make + " " + self.model
+          return long_name
+      
+      
+      def read_odometer(self):
+          '''打印汽车总里程'''
+          print("Total odometer: " + str(self.odometer_reading) + " miles. ")
+      
+          
+      def update_odometer(self,mileage):
+          '''
+          将里程表修改为指定的值
+          静止将里程表读数往回调
+          '''
+          if mileage > self.odometer_reading:
+              self.odometer_reading = mileage
+          else:
+              print("不允许作弊.")
+      
+      
+      def increment_odometer(self,miles):
+          if miles > 0:
+          	self.odometer_reading += miles
+          else:
+          	print("不允许作弊.")
+  
+  class Battery():
+      def __init__(self,battery_size=70):
+          '''初始化电瓶的属性'''
+          self.battery_size = battery_size
+          
+      def describe_battery(self):
+          print("This car has a " + str(self.battery_size) + '-kWh battery.')
+          
+          
+  class ElectricCar(Car):
+      def __init__(self,make,model,year):
+          super().__init__(make,model,year)
+          self.battery = Battery()   # 创建了一个Battery()的实例作为ElectricCar类的属性
+  
+  my_tesla = ElectricCar("tesla",'model y', 2018)
+  print(my_tesla.get_descriptive_name())
+  my_tesla.battery.describe_battery()
+  ```
+
+  有时候自己的类非常庞大，有非常多的属性和方法，这是可以采用上述方法，将类的一部分作为一个独立的类单独提取出来
+
+  上边新建了一个Battery类，以后想要再对电池做分析就更简洁了
+
+  ```Python
+  class Battery():
+      def __init__(self,battery_size=70):
+          '''初始化电瓶的属性'''
+          self.battery_size = battery_size
+          
+      def describe_battery(self):
+          print("This car has a " + str(self.battery_size) + '-kWh battery.')
+          
+      def get_range(self):
+          if self.battery_size == 70:
+              range = 240
+          elif self.battey_size == 80:
+              range = 270
+          message = "This car can go approximately " + str(range)
+          message += " miles on a full charge."
+          print(message)
+  ```
+
+### 11.4 导入类
+
+- 为了使文件更简洁，Python允许将类存储在模块中，然后在主程序中导入所需的模块
+
+- 可以把多个类放在一个模块中
+
+  ```Python
+  # car.py
+  class Car():
+  	---snip---
+      
+  class Battery():
+      ---snip---
+      
+  class ElectricCar(Car):
+      ---snip---
+  ```
+
+- 导入单个类
+
+  ```Python
+  from car import Car  # 从 car.py 文件中导入单个类 Car
+  ```
+
+- 导入多个类
+
+  ```Python
+  from car import Car,ElectricCar  # 多个类之间用逗号分隔
+  ```
+
+- 导入整个模块
+
+  ```Python
+  import car
+  
+  my_tesla = car.ElectricCar("tesla",'model y', 2018)  # 需要用句点表达式的方式来访问需要的类
+  ```
+
+  使用`module_name.class_name`的方式访问需要的类
+
+- 导入模块中的所有类
+
+  ```Python
+  from car import *
+  ```
+
+  不推荐使用这种方法，因为可能发生类名冲突
+
+- 从一个模块中导入很多类时，最好是导入整个模块，然后在接下来的代码中使用`module_name.class_name`的方式访问需要的类
+
+- 还可以从一个模块中导入另外一个模块
+
+  ```Python
+  # car.py 模块
+  class Car():
+  	---snip---
+  ```
+
+  ```Python
+  # electric_car.py 模块
+  from car import Car   # 从 car.py模块中导入Car类
+  
+  class Battery():
+      ---snip---
+      
+  class ElectricCar(Car):
+      ---snip---
+  ```
+
+  ```Python
+  # my_cars.py
+  from car import Car
+  from electric_car import ElectricCar
+  
+  my_beetle = Car("volk", 'beetle', 2018)
+  print(my_beetle.get_descriptive_name())
+  
+  my_tesla = ElectricCar("tesla",'model y', 2018)
+  print(my_tesla.get_descriptive_name())
+  ```
+
+### 11.5 自定义工作流程
+
+- 一开始应该尽可能的让结构简单，先尽可能的在一个文件中完成所有的工作，确定一切都能够正常运行后，再将类移到独立的模块中
 
 
 
