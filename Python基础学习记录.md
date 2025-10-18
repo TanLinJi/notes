@@ -1913,6 +1913,135 @@
 
 
 
+## 第12章 文件操作
+
+### 12.1 从文件中读取数据
+
+```Python
+with open('.//FileOP//pi_digits.txt') as file_object:
+    contents = file_object.read()  
+    print(contents)
+    
+-->
+3.1415926535
+  8979323846
+  2643383279
+			 # 多了一个空行
+```
+
+- 使用 **open()** 函数打开文件，并返回一个表示该文件的对象
+- 关键字 **with** 在不再需要访问打开的文件后关闭该文件，就不用手动用 **close()** 函数关闭文件，但是不推荐这种做法，因为有的时候程序不能正常运行到 close() 这里导致文件不能够正确的关闭从而导致文件数据受损
+- 所以使用 with 结构来让 Python 自己决定在合适的时候关闭文件
+- 使用 read() 方法读取目标文件的全部内容，并将其作为一个字符串
+- read() 方法到达文件末尾时返回一个空字符串，因此打印出来时会多一个空行，可以使用**rstrip()**去除字符串末尾的空白
+
+### 12.2 文件路径
+
+- 使用这种方法时，Python会在当前执行的文件所在的目录中查找文件
+
+  ```Python
+  with open('pi_digits.txt') as file_object:
+      ---snip---
+  ```
+
+- 使用相对路径，这是Python会在当前执行的文件所在的目录中的FileOP文件夹中去找目标文件
+
+  ```Python
+  with open('FileOP\pi_digits.txt') as file_object:
+      ---snip---
+  ```
+
+  windows系统中，使用反斜杠(/)而不是斜杠(\\)，或者使用双斜杠`\\`，这样就可以防止被转义
+
+- 使用绝对路径，因为绝对路径通常比较长，所以经常把它放在一个变量中
+
+  ```Python
+  file_path = 'D:\GiteeRepository\python-project\jupyter\FileOP\pi_digits.txt'
+  with open(file_path) as file_object:
+      ---snip---
+  ```
+
+### 12.3 逐行读取
+
+- 对文件对象使用for循环，以每次一行的方式检查文件：
+
+  ```Python
+  file_path = "FileOP/pi_digits.txt"
+  with open(file_path) as file_object:
+      for line in file_object:
+          print("- " + line)
+  
+  --->
+  - 3.1415926535
+  
+  -   8979323846
+  
+  -   2643383279
+  
+  ```
+
+  每行的末尾都有一个空白行，这是因为在文件中，每行的末尾都有一个换行符，而print语句也会自己加上一个换行符，所以答应出来有一个空行
+
+  可以使用**rstrip()**去除字符串末尾的空白
+
+  ```Python
+  file_path = "FileOP/pi_digits.txt"
+  with open(file_path) as file_object:
+      for line in file_object:
+          print("- " + line.rstrip())
+  ```
+
+- 创建一个包含文件多行的列表
+
+  ```Python
+  file_path = "FileOP/pi_digits.txt"
+  with open(file_path) as file_object:
+      lines = file_object.readlines()
+      
+  print(lines)  #  ['3.1415926535\n', '  8979323846\n', '  2643383279\n']
+  ```
+
+  readlines()方法从文件中读取每一行以列表的形式存储到lines中
+
+- Python读取我呢本文件时，对于所有的文本都解读为字符串，可以使用 int() 或 float() 函数转化成数字
+
+### 12.4 写入文件
+
+- 写入空文件，调用 open() 时，多提供一个参数 ‘w’ ，这个参数称为模式参数，告诉Python要写入文件
+
+  ```Python
+  file_path = 'FileOP/programming.txt'
+  
+  with open(file_path, 'w') as file_obj:  # 如果目标文件不存在，函数 open() 就新建一个文件
+      file_obj.write('I love programming.')
+  ```
+
+- 打开文件时，可以指定写入模式：`读取模式（’r’）`、`写入模式（‘w’）`、`附加模式（‘a’）`、`读取和写入模式（‘r+’）`
+
+- 以`写入模式（‘w’）`打开文件时，如果目标文件中存在内容，Python在返回该文件对象时会清空该文件里的内容
+
+- python只能将字符串写入到文本文件，如果是数值型数据，必须要用 str() 转换成字符串格式
+
+- 写入多行，write函数不会自动添加换行符，需要自己手动加上
+
+  ```Python
+  file_path = 'FileOP/programming.txt'
+  
+  with open(file_path, 'w') as file_obj:
+      file_obj.write('I love programming.\n')
+      file_obj.write('I love creating new games.\n')
+  ```
+
+- 附加到文件，使用 **附加模式**
+
+  ```Python
+  file_path = 'FileOP/programming.txt'
+  
+  with open(file_path, 'a') as file_obj:
+      file_obj.write('I also love finding meaning in large datasets.\n')
+      file_obj.write('I love creating apps that can run in a browser.\n')
+  ```
+
 
 
 
