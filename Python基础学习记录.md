@@ -2177,6 +2177,313 @@ with open('.//FileOP//pi_digits.txt') as file_object:
 
   `pass` 语句充当了占位符，提醒自己在某个地方什么都没做
 
+## 第14章 存储数据
+
+- 使用 `json` 格式存储数据
+
+- 使用 `json.jump()` 存储数据
+
+  ```Python
+  import json
+  
+  numbers = [1, 2, 3, 4, 5]
+  file_path = "./FileOP/numbers.json"
+  with open(file_path, 'w') as file_obj:
+      json.dump(numbers, file_obj)
+  ```
+
+- 使用 `json.load()` 读取数据
+
+  ```Python
+  import json 
+  
+  file_path = "./FileOP/numbers.json"
+  with open(file_path) as file_obj:
+      numbers = json.load(file_obj)
+  
+  print(numbers)
+  ```
+
+- 一次实例：
+
+  ```Python
+  # rember_me.py
+  import json
+  file_path = "./FileOP/username.json"
+  try:
+      with open(file_path) as f_obj:
+          user_name = json.load(f_obj)
+  except FileNotFoundError:
+      username = input("Tell me your name: ")
+      with open(file_path, 'w') as f_obj:
+          json.dump(username, f_obj)
+          print("We will rember you, Dear  " + username)
+  else:
+      print("Welcome back, " + username)
+  ```
+
+## 第15章 测试
+
+- Python标准库中的模块`unittest`提供了代码测试工具
+- **单元测试**用于核实函数的某个方面没有问题
+- **测试用例**是一组单元测试，这些单元测试一起核实函数在各种情况下都符合要求
+- **全覆盖式测试**用例包含一整套单元测试，涵盖了各种可能的函数使用方式
+
+### 15.1 测试函数
+
+- 要为函数编写测试用例，需要先导入模块`unittest`以及要测试的函数，在创建一个继承`unitest.TestCase`的类
+
+  ```Python
+  # name_function.py
+  
+  def get_fullname(first,last):
+      fullname = first + " " + last
+      return fullname.title()
+  ```
+
+  ```Python
+  # test_name_function.py
+  import unittest
+  from name_function import get_fullname
+  
+  class NamesTestCase(unittest.TestCase):  # 类名可以自定义，但是应尽量包含Test，而且必须继承 unittest.TestCase 类
+      """ 测试name_function.py """
+      def test_first_last_name(self):
+          fullname = get_fullname('jains', 'joplin')
+          self.assertEqual(fullname, 'Jains Joplin')
+  
+  unittest.main()
+  ```
+
+- 一个新的案例：
+
+  ```Python
+  # name_function.py
+  
+  def get_fullname(first, last, middle=''):
+      if middle:
+          fullname = first + " " + middle + " " + last
+      else:
+          fullname = first + " " + last
+      return fullname.title()
+  ```
+
+  ```Python
+  # test_name_function.py
+  import unittest
+  from name_function import get_fullname
+  
+  
+  class NamesTestCase(unittest.TestCase):
+      """ 测试name_function.py """
+  
+      def test_first_last_name(self):
+          fullname = get_fullname('jan', 'joplin')
+          self.assertEqual(fullname, 'Jan Joplin')
+  
+      def test_first_last_middle_name(self):
+          fullname = get_fullname('wolf', 'dog', 'amazes')
+          self.assertEqual(fullname, 'Wolf Dog Amazes')
+  
+  unittest.main()
+  ```
+
+- 一个新的案例
+
+  ```Python
+  # city_functions.py
+  
+  def get_formatted_city(city, country, population=''):
+      if population:
+          res = city + ', ' + country + '-' + str(population)
+      else:
+          res = city + ', ' + country
+      return res.title()
+  
+  ```
+
+  ```Python
+  # test_cities.py
+  
+  import unittest
+  from city_functions import get_formatted_city as gfc
+  
+  
+  class CitiesTestCase(unittest.TestCase):
+      """ 测试city_functions.py """
+  
+      def test_city_country(self):
+          res = gfc('xian', 'china')
+          self.assertEqual(res, 'Xian, China')
+  
+      def test_city_country_population(self):
+          res = gfc('santiago', 'chile', 25000)
+          self.assertEqual(res, 'Santiago, Chile-25000')
+  
+  # unittest.main()
+  ```
+
+### 15.2 测试类
+
+- `unittest.TestCase`中常用的断言方法
+
+  | 方法                                   | 用途                                                         |
+  | -------------------------------------- | ------------------------------------------------------------ |
+  | `assertEqual(a, b)`                    | 验证 `a == b`                                                |
+  | `assertNotEqual(a, b)`                 | 验证 `a != b`                                                |
+  | `assertTrue(x)`                        | 验证 `x` 为 `True`                                           |
+  | `assertFalse(x)`                       | 验证 `x` 为 `False`                                          |
+  | `assertIs(a, b)`                       | 验证 `a is b`（对象身份相同）                                |
+  | `assertIn(item,list)`                  | 验证 `item` 在 `list` 中                                     |
+  | `assertNotIn(item,list)`               | 验证 `item` 不在 `list` 中                                   |
+  | `assertIsNot(a, b)`                    | 验证 `a is not b`                                            |
+  | `assertIsNone(x)`                      | 验证 `x` 是 `None`                                           |
+  | `assertIsNotNone(x)`                   | 验证 `x` 不是 `None`                                         |
+  | `assertIn(a, b)`                       | 验证 `a` 包含在 `b` 中（`a in b`）                           |
+  | `assertNotIn(a, b)`                    | 验证 `a` 不包含在 `b` 中（`a not in b`）                     |
+  | `assertIsInstance(obj, cls)`           | 验证 `obj` 是 `cls` 的实例                                   |
+  | `assertNotIsInstance(obj, cls)`        | 验证 `obj` 不是 `cls` 的实例                                 |
+  | `assertAlmostEqual(a, b, places=7)`    | 验证浮点数 `a` 和 `b` 近似相等（精度为小数点后 `places` 位） |
+  | `assertNotAlmostEqual(a, b, places=7)` | 验证浮点数 `a` 和 `b` 不近似相等                             |
+  | `assertGreater(a, b)`                  | 验证 `a > b`                                                 |
+  | `assertGreaterEqual(a, b)`             | 验证 `a >= b`                                                |
+  | `assertLess(a, b)`                     | 验证 `a < b`                                                 |
+  | `assertLessEqual(a, b)`                | 验证 `a <= b`                                                |
+  | `assertListEqual(a, b)`                | 验证列表 `a` 和 `b` 内容及顺序一致                           |
+  | `assertDictEqual(a, b)`                | 验证字典 `a` 和 `b` 键值对完全一致                           |
+  | `assertTupleEqual(a, b)`               | 验证元组 `a` 和 `b` 内容及顺序一致                           |
+  | `assertSetEqual(a, b)`                 | 验证集合 `a` 和 `b` 内容相同（忽略顺序）                     |
+  | `assertMultiLineEqual(a, b)`           | 验证多行字符串 `a` 和 `b` 完全一致                           |
+
+- 类的测试大部分工作是测试类中方法的行为：
+
+  ```Python
+  # suvery.py
+  class AnonymousSurvey():
+      """ 收集匿名调查问卷的答案 """
+  
+      def __init__(self, question):
+          """存储一个问题，并为存储答案做准备"""
+          self.question = question
+          self.responses = []
+  
+      def show_question(self):
+          """显示调查问卷"""
+          print(self.question)
+  
+      def store_responses(self, new_response):
+          """存储单份调查问卷"""
+          self.responses.append(new_response)
+  
+      def show_results(self):
+          """显示收集到的所有答案"""
+          print("Survey results: ")
+          for res in self.responses:
+              print('-' + res)
+  ```
+
+  ```Python
+  # language_survey.py
+  from survey import AnonymousSurvey as AS
+  
+  # 定义一个问题，并创建一个表示调查的AnonymousSurvey对象
+  question = "What's your favorite language?"
+  my_survey = AS(question)
+  
+  # 显示问题并存储答案
+  my_survey.show_question()
+  print("Enter 'q' to quit. ")
+  while True:
+      response = input("Please tell me your answer: ")
+      if response == 'q':
+          break
+      else:
+          my_survey.store_responses(response)
+  
+  # 显示调查结果
+  print("\n Thank you: ")
+  my_survey.show_results()
+  ```
+
+- 开始测试`AnonymousSurvey`类
+
+  - 验证：如果用户面对调查问题时，只提供了一个答案，是否能够准确地存储
+
+    ```Python
+    # test_survey.py
+    import unittest
+    from survey import AnonymousSurvey
+    
+    
+    class TestAnonymousSurvey(unittest.TestCase):
+        """测试AnonymousSurvey类"""
+        def test_store_single_response(self):
+            question = "What your favorite language?"
+            my_survey = AnonymousSurvey(question)
+            my_survey.store_responses('English')
+    
+            self.assertIn('English', my_survey.responses)
+    ```
+
+  - 验证：如果用户提供了多个答案时，是否能够准确的存储：
+
+    ```Python
+    # test_survey.py
+    import unittest
+    from survey import AnonymousSurvey
+    
+    
+    class TestAnonymousSurvey(unittest.TestCase):
+        """测试AnonymousSurvey类"""
+        def test_store_single_response(self):
+            question = "What your favorite language?"
+            my_survey = AnonymousSurvey(question)
+            my_survey.store_responses('English')
+            self.assertIn('English', my_survey.responses)
+    
+        def test_store_three_responses(self):
+            question = "What your favorite language?"
+            my_survey = AnonymousSurvey(question)
+            responses = ['C++', 'C', 'Java']
+            for res in responses:
+                my_survey.store_responses(res)
+    
+            for res in responses:
+                self.assertIn(res, my_survey.responses)
+    ```
+
+- 使用方法 `setUp()`，在上边的`TestAnonymousSurvey`类中，每个测试方法都创建了一次`AnonymousSurvey`的实例，使用`setUp()`方法可以让我们只需创建一次实例对象，然后在每个测试方法中使用它：
+
+  ```Python
+  import unittest
+  from survey import AnonymousSurvey
+  
+  
+  class TestAnonymousSurvey(unittest.TestCase):
+      """测试AnonymousSurvey类"""
+  
+      def setUp(self) -> None:
+          """创建一个调查对象和一组答案，供使用的测试方法使用"""
+          question = "What your favorite language?"
+          self.my_survey = AnonymousSurvey(question)  
+          self.responses = ['C++', 'C', 'Java']
+  
+      def test_store_single_response(self):
+          """测试单个答案会被妥善的存储"""
+          self.my_survey.store_responses(self.responses[0])
+          self.assertIn(self.responses[0], self.my_survey.responses)
+  
+      def test_store_three_responses(self):
+          """测试多个答案会被妥善的存储"""
+          for res in self.responses:
+              self.my_survey.store_responses(res)
+  
+          for res in self.responses:
+              self.assertIn(res, self.my_survey.responses)
+  ```
+
+  在方法`setUp`中创建了一个调查对象 `my_survey` 和一个答案列表 `responses` , 并且都添加了前缀`self`(即存储在属性中)，因此可在这个类的任何地方使用
+
 
 
 
