@@ -2044,6 +2044,141 @@ with open('.//FileOP//pi_digits.txt') as file_object:
 
 
 
+## 第13章 异常
+
+- Python使用被称为**异常**的特殊**对象**来管理程序执行期间发生的错误
+
+- 如果代码中没有处理异常的代码块，程序会显示一个traceback
+
+- 异常是使用`try-except`代码块处理的
+
+  ```Python
+  # 处理 ZeroDivisionError:
+  try:
+      print(5/0)
+  except ZeroDivisionError:
+      print("You can't divide by zero.")
+  ```
+
+  这样就可以处理特定的异常，在上面代码中，可以处理`ZeroDivisionError`异常
+
+  如果 try 代码块中的代码没有问题，Python将跳过except代码块，否则，将查找这样的except代码块：except 指定的错误与引发的错误相同，并运行其中的代码
+
+- else 代码块：
+
+  ```Python
+  print("Give me two numbers, and I'll diveide them.")
+  print("Enter 'q' to quit.")
+  
+  while True:
+      first_num = input('first_num: ')
+      if first_num == 'q':
+          break
+      second_num = input('second_num: ')
+      if second_num == 'q':
+          break
+      try:
+          answer = int(first_num) / int(second_num)
+      except ZeroDivisionError:
+      	print("You can't divide by zero.")
+      else:
+          print("Answer: ", answer)
+  ```
+
+  在上述代码中，`try` 代码块中只包含可能导致错误的代码，如果发生错误将试图和`except`代码块中的错误匹配，如果没有错误就执行`else`代码块中的内容
+
+  excpet代码块的作用是告诉Python，在遇到了指定的异常应该怎么办
+
+- 处理 `FileNotFoundError` 异常
+
+  ```Python
+  file_name = 'alice.txt'
+  
+  with open(file_name) as f_obj:
+      contents = f_obj.read()   # FileNotFoundError: [Errno 2] No such file or directory: 'alice.txt'
+  ```
+
+  这个异常是 `open` 函数导致的，可以把 `open` 函数包含在 `try` 代码块中：
+
+  ```Python
+  file_name = 'alice.txt'
+  
+  try:
+      with open(file_name) as f_obj:
+          contents = f_obj.read()   
+  except:
+      msg = "Sorry, the file '" + file_name + "' does not exist."
+      print(msg)
+  ```
+
+- 分析文本
+
+  ```Python
+  title = 'Alice in Wonderland.'
+  
+  title.split()   # ['Alice', 'in', 'Wonderland.']
+  ```
+
+  `split()` 方法以空格为分隔符将字符串分拆成多个部份，并将这些部份都存储到一个列表中
+
+  ```Python
+  file_name = 'Alice in Wonderland.txt'
+  
+  try:
+      with open(file_name) as f_obj:
+          contents = f_obj.read()   
+  except:
+      msg = "Sorry, the file '" + file_name + "' does not exist."
+      print(msg)
+  else:
+      words = contents.split()
+      num_words = len(words)
+      print("Total words nums: " + str(num_words))
+  ```
+
+- 使用多个文件（包装成一个函数）
+
+  ```Python
+  def count_words(file_path):
+      """计算一个文件大致包含多少个单词"""
+      try:
+          with open(file_path) as f_obj:
+              contents = f_obj.read()   
+      except:
+          msg = "Sorry, the file '" + file_name + "' does not exist."
+          print(msg)
+      else:
+          words = contents.split()
+          num_words = len(words)
+          print("Total words nums: " + str(num_words))
+          
+  file_path = "./FileOP/alice.txt"
+  count_words(file_path)
+  ```
+
+- 使用 `pass`语句跳过对捕捉异常的处理部份
+
+  ```Python
+  def count_words(file_path):
+      try:
+          with open(file_path) as f_obj:
+              contents = f_obj.read() 
+      except FileNotFoundError:
+          pass
+      else:
+          words = contents.split()
+          num_words = len(words)
+          print("Total words nums: " + str(num_words))
+          
+          
+  file_path = "./FileOP/alice.txt"
+  count_words(file_path)        
+  ```
+
+  `pass` 语句充当了占位符，提醒自己在某个地方什么都没做
+
+
+
 
 
 ----
