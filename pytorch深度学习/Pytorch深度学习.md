@@ -143,3 +143,142 @@ class torch.utils.data.DataLoader(
 12. **persistent_workers**
     - 含义：布尔值（PyTorch 1.6 + 支持），是否在数据集迭代结束后保持子进程存活（而非销毁），默认为`False`。
     - 作用：多次迭代（如多轮训练）时复用子进程，减少进程创建 / 销毁的开销，加速数据加载。
+
+## Torch.nn
+
+```plaintext
+torch.nn
+├── Containers（组织和管理神经网络模块/参数的容器,其实就是一个骨架，往结构中添加不同的内容可以构成不同的神经网络）
+│   ├── Module：所有神经网络模块的基类，自定义网络需继承，提供参数管理等核心功能，也就是说为所有的神经网络提供一个基本的骨架
+│   ├── Sequential：顺序容器，按添加顺序执行子模块，简化层串联（如CNN的卷积+激活串联）
+│   ├── ModuleList：列表式容器，以列表存储子模块，支持索引访问，便于批量操作
+│   ├── ModuleDict：字典式容器，以键值对存储子模块，支持按key动态选择子模块
+│   ├── ParameterList：列表式容器，专门存储Parameter对象，方便批量管理可学习参数
+│   └── ParameterDict：字典式容器，专门存储Parameter对象，支持按key访问特定参数
+│
+├── Convolution Layers（通过滑动卷积核提取局部特征，处理网格/序列数据）
+│   ├── Conv1d：1D卷积，沿序列长度滑动，用于文本、音频等1D数据（提取局部时序特征）
+│   ├── Conv2d：2D卷积，沿高/宽滑动，用于图像等2D数据（提取局部空间特征）
+│   ├── Conv3d：3D卷积，沿深度/高/宽滑动，用于视频、3D图像等3D数据（提取时空特征）
+│   ├── ConvTranspose1d/2d/3d：转置卷积（反卷积），实现上采样，恢复特征图尺寸
+│   └── Unfold：滑动窗口拆分，将输入按窗口拆分为子张量，辅助手动实现卷积
+│
+├── Pooling Layers（通过聚合局部特征下采样，降低维度并增强鲁棒性）
+│   ├── MaxPool1d/2d/3d：最大池化，取窗口内最大值，保留显著特征，抗噪声
+│   ├── AvgPool1d/2d/3d：平均池化，取窗口内平均值，平滑特征，减少尖锐变化
+│   ├── AdaptiveMaxPool1d/2d/3d：自适应最大池化，输出固定尺寸（自动调整窗口）
+│   ├── AdaptiveAvgPool1d/2d/3d：自适应平均池化，同上，用平均操作实现固定输出
+│   └── LPPool1d/2d：Lp范数池化，按p范数聚合窗口特征，平衡最大与平均池化
+│
+├── Padding Layers（在张量边缘填充值，调整尺寸以匹配卷积/池化需求）
+│   ├── ZeroPad1d/2d/3d：零填充，边缘补0，常用于保持卷积后尺寸或控制感受野
+│   ├── ReflectionPad1d/2d：反射填充，边缘按镜像反射补值，减少图像边缘 artifacts
+│   ├── ReplicationPad1d/2d/3d：复制填充，边缘按最外层值复制，适合语义连续场景
+│   └── ConstantPad1d/2d/3d：常数填充，边缘补指定常数（如按业务需求补特定值）
+│
+├── Non-linear Activations (weighted sum, nonlinearity)（引入非线性能力，基于“加权和+非线性”）
+│   ├── ReLU：修正线性单元，输入>0时输出自身，缓解梯度消失，加速训练
+│   ├── LeakyReLU：带泄漏的ReLU，输入<0时输出小斜率值，避免神经元“死亡”
+│   ├── PReLU：参数化ReLU，负斜率为可学习参数，自适应调整非线性特性
+│   ├── Sigmoid：S型激活，映射到[0,1]，适合二分类概率输出或门控机制
+│   └── Tanh：双曲正切，映射到[-1,1]，零中心化输出，适合循环网络
+│
+├── Non-linear Activations (other)（其他非线性激活，适应特定场景需求）
+│   ├── Softmax：沿维度归一化，输出和为1的概率分布，用于多分类任务
+│   ├── GELU：高斯误差线性单元，Transformer中常用，平滑ReLU变体
+│   ├── Swish：x*sigmoid(βx)，带自门控机制，深层模型性能优于ReLU
+│   └── ELU：指数线性单元，输入<0时输出e^x-1，使均值接近0，抗噪声强
+│
+├── Normalization Layers（标准化特征分布，稳定训练，加速收敛）
+│   ├── BatchNorm1d/2d/3d：批归一化，对批次内样本的每个特征归一化，减少内部协变量偏移
+│   ├── LayerNorm：层归一化，对单个样本的所有特征归一化，不受批次大小影响，适合RNN/Transformer
+│   ├── InstanceNorm1d/2d/3d：实例归一化，对单个样本的单个通道归一化，适合风格迁移
+│   ├── GroupNorm：组归一化，将通道分组后对每组特征归一化，小批量替代BatchNorm
+│   └── SyncBatchNorm：同步批归一化，多GPU训练时跨设备同步批次统计量
+│
+├── Recurrent Layers（处理序列数据，通过记忆机制捕捉时序依赖）
+│   ├── RNN：基础循环网络，按时间步递归计算，易梯度消失/爆炸，适合短序列
+│   ├── LSTM：长短期记忆网络，通过三门控机制控制信息流动，缓解梯度消失，捕捉长依赖
+│   ├── GRU：门控循环单元，LSTM简化版（合并输入门和遗忘门），参数更少，训练更快
+│   └── RNNCell/LSTMCell/GRUCell：循环单元版本，一次处理单个时间步（手动控制时序循环）
+│
+├── Transformer Layers（基于自注意力机制，并行处理序列，捕捉长距离依赖）
+│   ├── MultiHeadAttention：多头自注意力，拆分输入为多个头并行计算，捕捉多尺度关联
+│   ├── TransformerEncoder：Transformer编码器，由多个EncoderLayer堆叠，输出序列特征
+│   ├── TransformerDecoder：Transformer解码器，由多个DecoderLayer堆叠，用于生成任务
+│   ├── TransformerEncoderLayer：编码器单层，含多头自注意力+前馈网络+残差连接
+│   └── TransformerDecoderLayer：解码器单层，含多头自注意力+交叉注意力+前馈网络
+│
+├── Linear Layers（实现特征线性变换，用于维度映射或输出预测）
+│   ├── Linear：全连接层，y = xA^T + b，将输入特征映射到指定输出维度（如分类器最后一层）
+│   └── Bilinear：双线性层，y = x1*A*x2 + b，融合两个输入的特征（如多模态数据融合）
+│
+├── Dropout Layers（随机失活神经元实现正则化，防止过拟合）
+│   ├── Dropout：随机失活，按概率将输入元素置0，通用正则化（适用于全连接、卷积层）
+│   ├── Dropout2d/3d：空间维度失活，按概率将整个特征图/体素置0，增强空间鲁棒性
+│   └── AlphaDropout：自归一化失活，配合SELU激活，保持输出均值和方差不变
+│
+├── Sparse Layers（处理离散输入（如索引），映射为稠密特征）
+│   ├── Embedding：嵌入层，将离散索引（如词ID）映射为固定维度的稠密向量（如词嵌入）
+│   └── EmbeddingBag：嵌入聚合层，对多个索引的嵌入向量求和/平均，高效处理变长序列
+│
+├── Distance Functions（计算张量间相似度或距离，用于度量学习）
+│   ├── PairwiseDistance：成对距离，计算两个张量间的Lp距离（如L2欧氏距离）
+│   └── CosineSimilarity：余弦相似度，计算张量夹角余弦值，衡量方向一致性（忽略幅值）
+│
+├── Loss Functions（衡量预测与标签差异，指导参数优化）
+│   ├── CrossEntropyLoss：交叉熵损失，结合LogSoftmax和NLLLoss，用于多分类
+│   ├── MSELoss：均方误差损失，计算预测与真实值的平方差，用于回归任务
+│   ├── BCEWithLogitsLoss：带sigmoid的二分类交叉熵，输入logits自动过sigmoid
+│   ├── NLLLoss：负对数似然损失，配合LogSoftmax使用，用于多分类
+│   └── L1Loss：L1损失，计算绝对差，对回归任务的异常值更稳健
+│
+├── Vision Layers（计算机视觉专用操作层）
+│   ├── Upsample：上采样，通过插值（最近邻、双线性等）放大特征图（如语义分割解码器）
+│   ├── PixelShuffle：像素重排，将通道特征“重排”到空间维度，实现高效上采样（超分辨率）
+│   ├── RoIPool：感兴趣区域池化，从特征图提取固定尺寸ROI特征（目标检测）
+│   └── RoIAlign：ROI对齐，解决RoIPool量化误差，更精确提取ROI特征（提升检测精度）
+│
+├── Shuffle Layers（打乱特征维度，促进信息交互）
+│   └── ChannelShuffle：通道打乱，将分组卷积的输出通道随机打乱，促进组间信息交流（如ShuffleNet）
+│
+├── DataParallel Layers (multi-GPU, distributed)（多设备并行训练，加速计算）
+│   ├── DataParallel：数据并行，单进程控制多GPU，拆分数据到不同GPU并行计算（单机多卡）
+│   └── DistributedDataParallel：分布式数据并行，多进程多GPU，支持多机多卡，同步效率更高
+│
+├── Utilities（网络构建辅助工具类）
+│   ├── Parameter：参数封装类，标记张量为可学习参数，自动纳入优化器更新范围
+│   ├── Buffer：缓冲区，存储非学习参数（如BatchNorm的均值/方差），随模型保存/加载
+│   └── Flatten：展平层，将多维张量展平为1D（如卷积层连接全连接层时使用）
+│
+├── Quantized Functions（模型量化压缩，加速推理并减少存储）
+│   ├── Quantize：量化层，将浮点张量转换为量化张量（降低精度，减少计算/存储）
+│   ├── DeQuantize：反量化层，将量化张量转回浮点张量（便于后续浮点操作）
+│   └── QFunctional：量化功能集合，提供量化版本的基础操作（如add、mul）
+│
+└── Lazy Modules Initialization（延迟初始化，自动推断输入维度，简化定义）
+    ├── LazyLinear：延迟初始化线性层，无需指定in_features，运行时自动推断
+    └── LazyConv2d：延迟初始化卷积层，无需指定in_channels，运行时自动推断
+```
+
+### torch.nn.Module()
+
+Module是所有神经网络的基类，为所有的神经网络提供了模板，基本的使用方法是：
+
+```python
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+class Model(nn.Module):  # 继承了 Module 类
+    def __init__(self) -> None:
+        super().__init__() # 必须调用父类的初始化函数
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x): # 这个也是比较重要的前向传播 input-->(nn: forward)-->ouput  所有的子类都应该重写这个方法
+        x = F.relu(self.conv1(x))  # 对输入x进行卷积，再经过ReLu进行非线性处理
+        return F.relu(self.conv2(x))  # x-->卷积-->ReLU-->卷积-->ReLu-->输出
+```
+
+基本上，所有的神经网络都是使用这样的模板
