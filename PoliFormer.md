@@ -195,15 +195,17 @@ python training/online/dinov2_vits_tsfm_rgb_augment_objectnav.py train \
 
 ### 使用预训练模型进行评估 
 
+#### 预备工作
 
-
-`1.下载与训练的ckpt模型：`
+下载与训练的ckpt模型：
 
 ```bash
 python scripts/download_trained_ckpt.py --save_dir checkpoints
 ```
 
-`2.使用文本导航模型运行评估:`
+#### 模型评估
+
+`1.使用文本导航模型运行评估:`
 
 ```bash
 # 模板
@@ -220,13 +222,13 @@ python training/online/online_eval.py \
 python training/online/online_eval.py \
 	--output_basedir result/text_nav \
     --num_workers 2 \
-    --ckpt_path checkpoints/text_nav/model.ckpt \
+    --ckpt_path ckpt/text_nav/model.ckpt \
     --training_tag text-nav \
     --house_set objaverse \
     --gpu_devices 0
 ```
 
-`3.使用纯 box-nav 模型运行评估： `
+`2.使用纯 box-nav 模型运行评估： `
 
 ```bash
 python training/online/online_eval.py \
@@ -240,7 +242,7 @@ python training/online/online_eval.py \
 	--ignore_text_goal
 ```
 
-`4. 使用文本框导航模型运行评估：`
+`3. 使用文本框导航模型运行评估：`
 
 ```bash
 python training/online/online_eval.py \
@@ -253,9 +255,46 @@ python training/online/online_eval.py \
 	--input_sensors raw_navigation_camera nav_task_relevant_object_bbox nav_accurate_object_bbox
 ```
 
+```
+python training/online/single_video_eval.py \
+  --model_config InferenceDINOv2ViTSLLAMATxTxObjectNavDist \
+  --training_tag your_training_run \
+  --ckpt_path /path/to/checkpoint.pth \
+  --sample_index 0 \
+  --dataset_path /data/datasets \
+  --output_basedir /data/results/single_evaluation \
+  --eval_subset minival \
+  --house_set objaverse \
+  --gpu_devices 0
+```
 
 
 
+#### 调试代码
+
+```bash
+python -m pdb training/online/online_eval.py \
+  --output_basedir result/box_nav \
+  --num_workers 1 \
+  --ckpt_path checkpoints/box_nav/model.ckpt \
+  --training_tag text-nav \
+  --house_set objaverse \
+  --gpu_devices 0 \
+  --input_sensors raw_navigation_camera nav_task_relevant_object_bbox nav_accurate_object_bbox \
+  --ignore_text_goal
+```
+
+pdb 常用命令
+
+- n：执行下一行
+- s：步入函数
+- c：继续到下一个断点
+- l：查看当前源码
+- b 路径:行号 或 b 函数名：加断点；例如
+  - b online_evaluation/online_evaluator_worker.py:146 # evaluate_on_task 开头
+  - b online_evaluation/online_evaluator_worker.py:210 # step 前
+- p 变量名 / pp 变量名：打印变量
+- q：退出
 
 ### 附录
 
@@ -404,3 +443,12 @@ WARNING:py.warnings:/home/jitl/anaconda3/envs/poliformer_copy/lib/python3.10/sit
 #### 2. 无法解析导入某个包
 
 ![1761743318514](PoliFormer.assets/1761743318514.png)`Ctrl + Shift + P` 打开VSCode命令面板，输入“Python: Select Interpreter”，选择解释器为当前的环境
+
+
+
+#### 3.allenact包导入问题
+
+后边不知道是怎么解决的
+
+![1762231078151](PoliFormer.assets/1762231078151.png)
+
