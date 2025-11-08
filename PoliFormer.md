@@ -114,7 +114,7 @@ PoliFormer/
 └── dinov2/                           # 视觉表征仓库（完整）
 ```
 
-#### 1. training/online/online_eval.py
+#### online_eval.py
 
 ##### 训练流程
 
@@ -178,7 +178,54 @@ online_eval用 AI2-THOR/ProcTHOR 的仿真器进行在线评估；任务样本�
 
      - 将 `(metrics, 视频/图信息)` 放入 [results_queue](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，主进程做聚合与本地 W&B 记录；见 [log_results](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 与 [log_aggregated_results](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)。
 
+### 数据集结构
 
+```text
+/home/jitl/PoliFormer/data
+├── fifteen/
+│   └── ObjectNavType/
+│       ├── .lock
+│       ├── constants.yaml
+│       ├── house_id_to_sub_house_id_train.json
+│       ├── house_id_to_sub_house_id_val.json
+│       ├── train/
+│       │   ├── 000001/
+│       │   │   ├── hdf5_sensors.hdf5
+│       │   │   ├── raw_manipulation_camera__0.mp4
+│       │   │   ├── raw_manipulation_camera__1.mp4
+│       │   │   ├── … (manipulation camera 分段视频，编号0–9)
+│       │   │   ├── raw_navigation_camera__0.mp4
+│       │   │   ├── raw_navigation_camera__1.mp4
+│       │   │   ├── … (navigation camera 分段视频，编号0–9)
+│       │   │   └── success.txt
+│       │   ├── 000002/
+│       │   ├── 000004/
+│       │   ├── … (大量六位数字ID目录，每个结构与 000001 类似)
+│       └── val/
+│           ├── 000018/
+│           ├── 000027/
+│           ├── 000028/
+│           ├── … (验证集同样由大量六位数字ID目录组成)
+├── nltk_data/
+│   └── corpora/
+│       ├── wordnet/        (展开后的 WordNet 语义词典目录)
+│       ├── wordnet.zip     (压缩包原文件，可能保留用于重复构建或校验)
+│       ├── wordnet2022/    (新版或扩展版 WordNet 2022 版本解压目录)
+│       ├── wordnet2022.zip (2022版压缩包)
+├── objaverse_assets/
+│   └── 2023_07_28/
+│       ├── annotations.json.gz
+│       ├── annotations.lock
+│       ├── assets/         (实际 3D 资源文件：如 .glb/.obj/贴图 等，未深入列出)
+│       └── objects.lock
+└── objaverse_houses/
+    └── houses_2023_07_28/
+        ├── hdf5_sensors.hdf5
+        ├── raw_manipulation_camera__0.mp4
+        ├── … (与 train/000001 示例结构一致的多段操作/导航视频)
+        ├── raw_navigation_camera__0.mp4
+        └── success.txt
+```
 
    
 
