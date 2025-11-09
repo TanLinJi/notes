@@ -1,3 +1,5 @@
+PoliFormer 是一个基于 Transformer 的强化学习项目，专注于机器人导航任务，特别是对象导航（Object Navigation）。该项目使用 AllenAct 框架、DINO 视觉编码器和 LLaMA 风格的 Transformer 来训练强大的导航代理。
+
 ### 项目结构
 
 ```text
@@ -343,6 +345,47 @@ pdb 常用命令
 - p 变量名 / pp 变量名：打印变量
 - q：退出
 
+
+
+#### 评估流程
+
+​	为了处理**一个单独的评估任务**（比如1000个中的第1个），程序到底加载了哪些东西，以及这些东西是如何协同工作的。
+
+​	我将以一个具体的例子，即处理**第一个评估数据**，来为你完整地追踪整个加载和准备流程。
+
+为了处理一个任务，程序需要加载**两大类核心资产**：
+
+1. **任务规格 (Task Specification)**：一个 JSON 对象，定义了任务的**目标**。它就像一张“任务卡”，告诉 Agent“你要做什么”。这包括：
+   - **目标物体**：比如“找到一个苹果 (apple)”。
+   - **起始位置**：Agent 在房子里的初始坐标和朝向。
+   - **所在房屋**：这个任务发生在哪一个具体的房子里。
+   - **专家路径长度**：最优解需要多少步（用于计算 `SEL` 指标）。
+2. **环境资产 (Environment Assets)**：任务卡中指定的“房子”本身，以及房子里所有物体的 3D 模型和纹理。这包括：
+   - **房屋场景文件 (House JSON)**：一个大的 JSON 文件，描述了整个房子的结构，包括房间、墙壁、门、窗户，以及所有家具和物体的初始位置、旋转、大小等。
+   - **3D 模型文件 (Object GLB/Asset)**：房子里每一个物体（比如桌子、椅子、苹果）的 3D 模型文件（通常是 `.glb` 格式）。这些文件由你设置的 `OBJAVERSE_DATA_DIR` 环境变量指向。
+
+
+
+你说的一个 JSON 对象，定义了任务的目标，在项目的哪个位置，怎么指定目标物体，起始位置，所在房屋等等，专家路径长度是自己指定的吗？我事先应该不知道这个专家路径长度吧？
+
+1. **分析启动参数**：在 [online_eval.py](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 中，`parse_args()` 函数会解析你的命令。你没有指定 `--dataset_type` 和 `--eval_subset`，所以程序会使用它们的**默认值**：
+   - `--dataset_type`: 默认为 `"object_nav_v0.3"`
+   - `--eval_subset`: 默认为 `"minival"`
+2. **定位数据集文件**：`OnlineEvaluatorManager` 在初始化时，会根据这些参数构建数据集文件的路径。它会在 [data](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 目录下寻找一个名为 `object_nav_v0.3.json.gz` 的文件。
+   - **具体文件**：`/home/jitl/PoliFormer/data/object_nav_v0.3.json.gz`
+   - 这个压缩的 JSON 文件里包含了成千上万个“任务规格”（Task Specifications），每一个都是一个独立的评估任务
+
+我在那里去查看有哪些dataset_type，eval_subset是什么意思
+请你具体解释一下object_nav_v0.3.json.gz这个文件的内容，我每次运行都要执行完这里边的所有任务吗？每次程序都要自己解压这个文件吗？而且事实上我的data目录下并没有这个文件
+
+
+
+
+
+第 1 步：确定要评估的数据集文件
+
+
+
 ### 附录
 
 #### 1. 环境安装
@@ -498,4 +541,129 @@ WARNING:py.warnings:/home/jitl/anaconda3/envs/poliformer_copy/lib/python3.10/sit
 后边不知道是怎么解决的
 
 ![1762231078151](PoliFormer.assets/1762231078151.png)
+
+
+
+### 动作指令
+
+`1. utils/type_utils.py：`
+
+```python
+class THORActions:
+    """
+    定义在 AI2-THOR 环境中所有可执行动作的简写形式。
+    这使得代码更简洁，同时通过一个中心位置管理所有动作。
+    """
+    # 基本导航动作
+    move_ahead = "m"  	# 向前移动
+    move_back = "b"   	# 向后移动
+    rotate_right = "r"  # 向右旋转
+    rotate_left = "l"   # 向左旋转
+    rotate_right_small = "rs"  # 小幅度右转
+    rotate_left_small = "ls"   # 小幅度左转
+    done = "end"  		# 结束任务
+
+    # 机械臂动作
+    move_arm_up = "yp"  # 机械臂向上
+    move_arm_up_small = "yps"  # 机械臂小幅度向上
+    move_arm_down = "ym"  # 机械臂向下
+    move_arm_down_small = "yms"  # 机械臂小幅度向下
+    move_arm_out = "zp"  # 机械臂伸出
+    move_arm_out_small = "zps"  # 机械臂小幅度伸出
+    move_arm_in = "zm"  # 机械臂缩回
+    move_arm_in_small = "zms"  # 机械臂小幅度缩回
+
+    # 手爪动作
+    wrist_open = "wp"  	# 张开手爪
+    wrist_close = "wm"  # 闭合手爪
+    pickup = "p"  	# 拾取物体
+    dropoff = "d"  	# 放下物体
+
+    # 将动作按类型分组，方便使用
+    ARM_ACTIONS = [  # 机械臂动作
+        move_arm_in,
+        move_arm_out,
+        move_arm_up,
+        move_arm_down,
+        move_arm_in_small,
+        move_arm_out_small,
+        move_arm_up_small,
+        move_arm_down_small,
+    ]
+    MOVE_ACTIONS = [  # 移动动作
+        move_ahead,
+        move_back,
+    ]
+    ROTATE_ACTIONS = [  # 旋转动作
+        rotate_right,
+        rotate_left,
+        rotate_right_small,
+        rotate_left_small,
+    ]
+    sub_done = "sub_done"  # 子任务完成
+
+    @classmethod
+    def get_action_name(cls, short_string):
+        """
+        一个类方法，根据动作的简写字符串返回其完整的变量名。
+        例如，输入 "m"，返回 "move_ahead"。
+        """
+        for name, value in cls.__dict__.items():
+            if value == short_string:
+                return name
+        return None
+```
+
+
+
+### Q
+
+好像这是在仿真上运行的结果，经过Poliformer输出的动作指令序列是在哪里生成的，有传送到了哪里，我可以保存这个动作指令吗，动作指令的格式是怎样的，包括哪些内容，请你分析整个项目代码，找到这个部分，帮我进行详细的分析。
+
+
+
+现在，针对评估过程的数据集输入，我还比较疑惑，输入是什么，我通过python training/online/online_eval.py \
+	--output_basedir result/text_nav \
+    --num_workers 2 \
+    --ckpt_path ckpt/text_nav/model.ckpt \
+    --training_tag text-nav \
+    --house_set objaverse \
+    --gpu_devices 0
+命令执行的时候，会读取我数据集里的哪些东西，我事先已经设置了环境变量：export OBJAVERSE_HOUSES_DIR=/home/jitl/PoliFormer/data/objaverse_houses/houses_2023_07_28
+export OBJAVERSE_DATA_DIR=/home/jitl/PoliFormer/data/objaverse_assets/2023_07_28
+export DETIC_REPO_PATH=/home/jitl/PoliFormer/Detic
+
+我看到输出的结果，似乎他是进行批量处理的，我现在不懂这个，我给你举个例子，比如他一共处理1000个数据，但是处理每个数据，都需要很多的配套信息，你需要告诉我，比如说，处理第一个数据，他需要加载哪些东西，这些东西你不要只是给你认为的，而是直接给出我项目里的东西，
+
+
+
+请你针对我的数据集进行说明，说明一下哪些文件是什么，有什么作用，都是需要真实的，你不要自己想想，一切从项目代码出发进行分析，比如/fifteen/ObjectNavType，fifteen是什么，ObjectNavType是什么，下边有train和val子文件夹和一些文件，train是训练集，train里边又有000001，000002,这些是什么，000001下又有什么，分别又是什么
+
+
+
+- 模型推理与动作字符串由 inference_agent.py 负责：
+
+  - get_action(...) -> act(...)
+
+  - act(...) 调用 actor_critic 网络得到分布（ActorCriticOutput），
+
+  - 采样：`action = actor_critic_output.distributions.sample()`
+
+  - 或取贪心：`action_greedy = actor_critic_output.distributions.mode()`
+
+  - flatten 索引：`self.last_action_flat = su.flatten(self.actor_critic.action_space, action)`
+
+  - 将索引映射成字符串：通过 [get_action_list()](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 返回的 action_list（默认为 [ALL_STRETCH_ACTIONS](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 或者由环境变量 ACTION_DICT 指定的文件），再用 [su.action_list(...)](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 取第 0 个索引，得到 [action_str](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)。
+
+  - 函数实际返回：
+
+    ```
+    return action_str, actor_critic_output.distributions.probs[0][0]
+    ```
+
+    - 即第一项是动作字符串，第二项是该分布给出的概率（当前实现返回一个 prob 标量）。
+
+
+
+
 
