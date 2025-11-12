@@ -962,3 +962,65 @@ angent是什么，是在哪里生成的agent
 
 
 1. DataStat/ObjectNavType/synsets（物体类别样本数量统计）
+
+
+
+
+
+
+
+### task_type参数说明
+
+task_type 参数决定了你要评估的具体任务是什么，可以在 `/home/jitl/PoliFormer/tasks/__init__.py`中查看所有已经注册到的单个任务，或者在`/home/jitl/PoliFormer/training/online/dataset_mixtures.py`查看预定义的混合任务类型。
+
+这个文件通过一个名为 `REGISTERED_TASKS` 的字典，将任务名称（即你可以提供给 `--task_type` 的字符串）映射到实现该任务的具体 Python 类。
+
+1. 单个任务类型 `__init__.py`
+
+这个文件是所有单个任务类型的注册中心，它的作用是自动发现并注册所有定义在 tasks 目录下的、继承自 AbstractSPOCTask 的具体任务类。
+
+当运行`online_eval.py`时，[REGISTERED_TASKS](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 这个字典会包含所有可用的任务类型，[tasks](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 目录下的每个任务实现文件（例如 `object_nav_task.py`）都会向这里注册一个任务类型。也就是说，[init.py](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 文件会自动扫描该目录下所有的任务类，并将它们注册到一个名为 [REGISTERED_TASKS](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 的全局字典中。
+
+最常见的单个任务类型就是 `ObjectNavType`，[object_nav_task.py](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 文件中定义了 `ObjectNavType` 任务类的所有逻辑（如何判断成功、如何计算奖励等）。
+
+2. 混合任务类型 `dataset_mixtures.py`
+
+这个文件定义了**由多个单个任务组合而成的“任务包”**，它并不会定义单个任务，而是而是引用和组合它们。当想要一次性评估模型在多种不同任务上的综合表现时，就可以使用这里定义的混合名称。其中定义了：
+
+- **CHORES**: 这是一个任务混合，包含了：
+  - `ObjectNavType` (物体导航)
+  - `PickupType` (拾取物体)
+  - `FetchType` (取物，即导航到物体并拾取)
+  - `RoomVisit` (房间访问)
+- **CHORESNAV**: 这是一个专注于导航的任务混合，包含了多种不同形式的导航任务，例如：
+  - `ObjectNavType` (基础物体导航)
+  - `ObjectNavRoom` (在指定房间内导航到物体)
+  - `ObjectNavRelAttribute` (根据相对属性导航，如“找到离沙发最近的椅子”)
+  - `ObjectNavAffordance` (根据功能导航，如“找到可以坐的东西”)
+  - `ObjectNavLocalRef` (使用局部参照物导航)
+  - `ObjectNavDescription` (根据详细描述导航)
+  - `RoomNav` (导航到指定房间)
+
+**总结：**
+
+可以通过以下两种方式为 `--task_type` 参数赋值：
+
+1. 指定单个任务：
+   - `--task_type ObjectNavType`
+   - `--task_type PickupType`
+   - `--task_type FetchType`
+   - ... (以及在 [tasks](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 目录下实现的其他任何具体任务类型，这些任务类型都定义在 [tasks](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 目录下的各个 Python 文件中)
+2. ****指定混合任务包**** (通常用于在 `minival` 子集上进行综合评估):
+   - `--task_type CHORES`
+   - `--task_type CHORESNAV`
+3. 提供不同方式的参数时，背后的逻辑：
+   - 如果提供 ObjectNavType（单个任务）：
+     - `online_eval.py` 脚本会检查 `ObjectNavType` 是否在 [REGISTERED_TASKS](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 字典里。
+     - 它发现这是一个合法的、已注册的单个任务。
+     - 于是，评估器就只加载并运行 `ObjectNavType` 这一个任务类型。
+   - 如果你提供 CHORES（混合任务）：
+     - `online_eval.py` 脚本检查发现 [CHORES](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 不在 [REGISTERED_TASKS](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 字典里。
+     - 于是，它会调用 [get_mixture_by_name("CHORES")](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 函数，这个函数从 [dataset_mixtures.py](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 中返回一个列表：`["ObjectNavType", "PickupType", "FetchType", "RoomVisit"]`。
+     - 评估器接收到这个任务列表，然后会依次加载并运行列表中的所有任务类型。
+
+  
