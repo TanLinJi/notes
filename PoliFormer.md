@@ -1,6 +1,8 @@
-PoliFormer 是一个基于 Transformer 的强化学习项目，专注于机器人导航任务，特别是对象导航（Object Navigation）。该项目使用 AllenAct 框架、DINO 视觉编码器和 LLaMA 风格的 Transformer 来训练强大的导航代理。
+# PoliFormer
 
-### 项目结构
+> PoliFormer 是一个基于 Transformer 的强化学习项目，专注于机器人导航任务，特别是对象导航（Object Navigation）。该项目使用 AllenAct 框架、DINO 视觉编码器和 LLaMA 风格的 Transformer 来训练强大的导航代理。
+
+### 项目结构树
 
 ```text
 PoliFormer/
@@ -96,6 +98,73 @@ PoliFormer/
 ├── TRAINING_README.md # 提供专门针对模型训练的详细指南，解释如何准备数据、设置参数和启动训练任务。
 ```
 
+### 数据集结构树
+
+```text
+/home/jitl/PoliFormer/data
+├── fifteen/
+│   └── ObjectNavType/
+│       ├── .lock
+│       ├── constants.yaml
+│       ├── house_id_to_sub_house_id_train.json
+│       ├── house_id_to_sub_house_id_val.json
+│       ├── train/
+│       │   ├── 000001/
+│       │   │   ├── hdf5_sensors.hdf5
+│       │   │   ├── raw_manipulation_camera__0.mp4
+│       │   │   ├── raw_manipulation_camera__1.mp4
+│       │   │   ├── … (manipulation camera 分段视频，编号0–9)
+│       │   │   ├── raw_navigation_camera__0.mp4
+│       │   │   ├── raw_navigation_camera__1.mp4
+│       │   │   ├── … (navigation camera 分段视频，编号0–9)
+│       │   │   └── success.txt
+│       │   ├── 000002/
+│       │   ├── 000004/
+│       │   ├── … (大量六位数字ID目录，每个结构与 000001 类似)
+│       └── val/
+│           ├── 000018/
+│           ├── 000027/
+│           ├── 000028/
+│           ├── … (验证集同样由大量六位数字ID目录组成)
+├── nltk_data/
+│   └── corpora/
+│       ├── wordnet/        (展开后的 WordNet 语义词典目录)
+│       ├── wordnet.zip     (压缩包原文件，可能保留用于重复构建或校验)
+│       ├── wordnet2022/    (新版或扩展版 WordNet 2022 版本解压目录)
+│       ├── wordnet2022.zip (2022版压缩包)
+├── objaverse_assets/
+│   └── 2023_07_28/
+│       ├── annotations.json.gz
+│       ├── annotations.lock
+│       ├── assets/         (实际 3D 资源文件：如 .glb/.obj/贴图 等，未深入列出)
+│       └── objects.lock
+└── objaverse_houses/
+    └── houses_2023_07_28/
+        ├── hdf5_sensors.hdf5
+        ├── raw_manipulation_camera__0.mp4
+        ├── … (与 train/000001 示例结构一致的多段操作/导航视频)
+        ├── raw_navigation_camera__0.mp4
+        └── success.txt
+```
+
+
+
+### 在线评估（online_eval.py）
+
+##### 评估流程
+
+​		入口脚本 [online_eval.py](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 解析命令行参数 → 构建 [OnlineEvaluatorManager](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)（评估调度器）→ 给它一个 Agent 类 `InferenceAgentVIDA` 和构造参数 → 调度器按任务样本把工作分发到一个或多个“评估 Worker 进程”（[online_evaluator_worker.py](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)）→ 每个 Worker 在 AI2-THOR 仿真器中跑若干条 Episode：取观测→Agent 出动作→环境步进→收集帧与指标 → 回传主进程 → 主进程按任务/类别聚合并用本地 W&B（`LocalWandb`）记录指标与视频表格，最终输出到 `--output_basedir`。
+
+在本地“wandb”日志中会记录什么
+
+
+
+
+
+
+
+——————
+
 #### 三种模型权重文件解释
 
 这三个模型 (`box_nav`, `text_box_nav`, `text_nav`) 代表了三种不同难度和能力的导航任务
@@ -149,12 +218,6 @@ PoliFormer/
 
 
 #### online_eval.py
-
-##### 训练流程
-
-​		入口脚本 [online_eval.py](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 解析命令行参数 → 构建 [OnlineEvaluatorManager](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)（评估调度器）→ 给它一个 Agent 类 `InferenceAgentVIDA` 和构造参数 → 调度器按任务样本把工作分发到一个或多个“评估 Worker 进程”（[online_evaluator_worker.py](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)）→ 每个 Worker 在 AI2-THOR 仿真器中跑若干条 Episode：取观测→Agent 出动作→环境步进→收集帧与指标 → 回传主进程 → 主进程按任务/类别聚合并用本地 W&B（`LocalWandb`）记录指标与视频表格，最终输出到 `--output_basedir`。
-
-在本地“wandb”日志中会记录什么
 
 
 
@@ -271,13 +334,11 @@ PoliFormer 项目遵循典型的机器学习/强化学习工作流，分为训�
 
    - `actor_critic_output`: 模型返回一个包含动作分布（`distributions`）的对象。这个分布告诉我们，在当前状态下，执行每个可能动作的概率是多少。
 
-   - 采样决策
-
-     :
+   - 采样决策:
 
      - 如果是 `greedy_sampling`，就选择概率最高的动作 (`distributions.mode()`)。
-     - 否则，从概率分布中随机采样一个动作 (`distributions.sample()`)。
-
+- 否则，从概率分布中随机采样一个动作 (`distributions.sample()`)。
+  
    - **动作转换**: 模型输出的是一个动作索引（一个数字），[get_action_list()](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 方法负责将这个索引映射回一个人类可读的动作字符串（如 `m-l`、[pickup](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)）。这个映射关系来自于 `action_dict.json` 文件。
 
    - **返回结果**: 最终，`act` 方法返回两个值：选择的动作字符串和该动作的概率，供外部（[online_evaluator_worker.py](vscode-file://vscode-app/d:/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)）使用。
@@ -363,56 +424,9 @@ PoliFormer的评估流程是一个**闭环RL循环**，代理在模拟环境中�
 
 **整个流程是模拟的**：代理在一个虚拟的3D房屋中“生活”，像机器人一样探索和行动。输出视频是这个过程的录像，用于人类查看和评估。
 
-### 数据集结构
 
-```text
-/home/jitl/PoliFormer/data
-├── fifteen/
-│   └── ObjectNavType/
-│       ├── .lock
-│       ├── constants.yaml
-│       ├── house_id_to_sub_house_id_train.json
-│       ├── house_id_to_sub_house_id_val.json
-│       ├── train/
-│       │   ├── 000001/
-│       │   │   ├── hdf5_sensors.hdf5
-│       │   │   ├── raw_manipulation_camera__0.mp4
-│       │   │   ├── raw_manipulation_camera__1.mp4
-│       │   │   ├── … (manipulation camera 分段视频，编号0–9)
-│       │   │   ├── raw_navigation_camera__0.mp4
-│       │   │   ├── raw_navigation_camera__1.mp4
-│       │   │   ├── … (navigation camera 分段视频，编号0–9)
-│       │   │   └── success.txt
-│       │   ├── 000002/
-│       │   ├── 000004/
-│       │   ├── … (大量六位数字ID目录，每个结构与 000001 类似)
-│       └── val/
-│           ├── 000018/
-│           ├── 000027/
-│           ├── 000028/
-│           ├── … (验证集同样由大量六位数字ID目录组成)
-├── nltk_data/
-│   └── corpora/
-│       ├── wordnet/        (展开后的 WordNet 语义词典目录)
-│       ├── wordnet.zip     (压缩包原文件，可能保留用于重复构建或校验)
-│       ├── wordnet2022/    (新版或扩展版 WordNet 2022 版本解压目录)
-│       ├── wordnet2022.zip (2022版压缩包)
-├── objaverse_assets/
-│   └── 2023_07_28/
-│       ├── annotations.json.gz
-│       ├── annotations.lock
-│       ├── assets/         (实际 3D 资源文件：如 .glb/.obj/贴图 等，未深入列出)
-│       └── objects.lock
-└── objaverse_houses/
-    └── houses_2023_07_28/
-        ├── hdf5_sensors.hdf5
-        ├── raw_manipulation_camera__0.mp4
-        ├── … (与 train/000001 示例结构一致的多段操作/导航视频)
-        ├── raw_navigation_camera__0.mp4
-        └── success.txt
-```
 
-   
+ 
 
 ### 训练模型
 
@@ -464,9 +478,9 @@ python training/online/online_eval.py \
 
 ```bash
 python training/online/online_eval.py \
-	--output_basedir result/box_nav \
+	--output_basedir results/box_nav \
 	--num_workers 2 \
-	--ckpt_path checkpoints/box_nav/model.ckpt \
+	--ckpt_path ckpt/box_nav/model.ckpt \
 	--training_tag text-nav \
 	--house_set objaverse \
 	--gpu_devices 0 \
@@ -478,9 +492,9 @@ python training/online/online_eval.py \
 
 ```bash
 python training/online/online_eval.py \
-	--output_basedir result/text_box_nav \
+	--output_basedir results/text_box_nav \
 	--num_workers 2 \
-	--ckpt_path checkpoints/text_box_nav/model.ckpt \
+	--ckpt_path ckpt/text_box_nav/model.ckpt \
 	--training_tag text-nav \
 	--house_set objaverse \
 	--gpu_devices 0 \
@@ -488,16 +502,14 @@ python training/online/online_eval.py \
 ```
 
 ```
-python training/online/single_video_eval.py \
-  --model_config InferenceDINOv2ViTSLLAMATxTxObjectNavDist \
-  --training_tag your_training_run \
-  --ckpt_path /path/to/checkpoint.pth \
-  --sample_index 0 \
-  --dataset_path /data/datasets \
-  --output_basedir /data/results/single_evaluation \
-  --eval_subset minival \
-  --house_set objaverse \
-  --gpu_devices 0
+python training/online/online_eval.py \
+	--output_basedir resultstext_box_nav \
+	--num_workers 1 \
+	--ckpt_path ckpt/text_box_nav/model.ckpt \
+	--training_tag text-nav \
+	--house_set objaverse \
+	--gpu_devices 0 \
+	--input_sensors raw_navigation_camera nav_task_relevant_object_bbox nav_accurate_object_bbox
 ```
 
 
@@ -839,6 +851,8 @@ angent是什么，是在哪里生成的agent
 
 我还是想知道，经过online_eval评估的整个流程，我原来的理解是，输入一个视频，给定一个任务，比如说摘到一个苹果，然后就去找这个苹果，然后输出整个找苹果的过程的视频保存下来。但是现在好像不是这样的，我现在还是没明白数据的输入是什么？
 
+
+
 - 模型推理与动作字符串由 inference_agent.py 负责：
 
   - get_action(...) -> act(...)
@@ -939,6 +953,10 @@ angent是什么，是在哪里生成的agent
 
 
 
+AI2-THOR 模拟环境到底是个什么东西，有什么作用，在整个过程中参与了哪个阶段，具体的流程是什么
+
+
+
 ### 修改的内容
 
 /home/jitl/PoliFormer/online_evaluation/online_evaluator_worker.py
@@ -1024,3 +1042,95 @@ task_type 参数决定了你要评估的具体任务是什么，可以在 `/home
      - 评估器接收到这个任务列表，然后会依次加载并运行列表中的所有任务类型。
 
   
+
+### 其他
+
+使用：
+
+```python
+python training/online/online_eval.py   --output_basedir resultstext_box_nav   --num_workers 1   --ckpt_path ckpt/text_box_nav/model.ckpt   --training_tag text-nav   --house_set objaverse   --gpu_devices 0   --input_sensors raw_navigation_camera nav_task_relevant_object_bbox nav_accurate_object_bbox
+```
+
+命令后得到的输出，其目录的树状图解释：
+
+```text
+/home/jitl/PoliFormer/results/resultstext_box_nav/
+│
+├── OnlineEval-training_run_id=None-eval_dataset=object_nav_v0.3-eval_subset=minival-shuffle=False-greedy_sampling=False-test_augmentation=False/
+│   │   # 这是一个评估实验的根目录。
+│   │   # "training_run_id=None" 表示这次评估没有关联一个特定的训练运行ID。
+│   │   # "eval_dataset=object_nav_v0.3" 指明了评估使用的数据集版本。
+│   │   # "eval_subset=minival" 表示在 'minival' 这个小子集上进行。
+│   │   # 其他参数如 "shuffle=False"（不打乱顺序），"greedy_sampling=False"（使用随机采样而非贪心策略），"test_augmentation=False"（测试时不使用数据增强）。
+│   │
+│   ├── 11_12_2025_07_33_54_171377/
+│   │   │   # 一次具体评估运行的目录，以 "月_日_年_时_分_秒_微秒" 格式命名。
+│   │   │
+│   │   └── wandb/
+│   │       │   # Weights & Biases (W&B) 日志目录，用于本地存储运行指标和元数据。
+│   │       │
+│   │       └── x3C9dZul/
+│   │           │   # W&B 为本次运行生成的唯一ID目录。
+│   │           │
+│   │           └── logs.txt
+│   │               # 记录了该次评估运行的详细控制台输出和日志信息。
+│   │
+│   └── 11_12_2025_07_37_12_816618/
+│       │   # 另一次评估运行的目录。
+│       │
+│       └── wandb/
+│           └── AbVOGcRa/
+│               └── logs.txt
+│
+└── OnlineEval-training_run_id=text-nav-eval_dataset=object_nav_v0.3-eval_subset=minival-shuffle=False-greedy_sampling=False-test_augmentation=False/
+    │   # 这是另一次评估实验的根目录。
+    │   # "training_run_id=text-nav" 表示这次评估关联了名为 "text-nav" 的训练运行。
+    │
+    ├── 11_12_2025_07_40_51_804169/
+    │   │   # 一次具体的评估运行目录。
+    │   │
+    │   ├── wandb/
+    │   │   # W&B 日志目录。
+    │   │
+    │   ├── task=ObjectNavType,house=420,sub_house_id=0_find-a-mug_actions.json
+    │   │   # 针对 "find a mug" 任务在 house 420 中生成的动作序列文件。
+    │   │   # 这是一个JSON文件，记录了智能体在该任务中执行的每一个动作。
+    │   │
+    │   ├── task=ObjectNavType,house=420,sub_house_id=0_find-a-mug.mp4
+    │   │   # 同一任务的视频录像文件，记录了智能体的第一人称视角画面。
+    │   │
+    │   └── task=ObjectNavType,house=420,sub_house_id=0_find-a-mug.mp4_topdown.png
+    │       # 同一任务的俯视图（Top-Down View）轨迹图。
+    │       # 这张图片展示了智能体在场景中的移动路径。
+    │
+    ├── 11_12_2025_07_46_30_277345/
+    │   │   # 另一次评估运行的目录。
+    │   │
+    │   ├── wandb/
+    │   ├── task=ObjectNavType,house=420,sub_house_id=0_find-a-mug_actions.json
+    │   ├── task=ObjectNavType,house=420,sub_house_id=0_find-a-mug.mp4
+    │   ├── task=ObjectNavType,house=420,sub_house_id=0_find-a-mug.mp4_topdown.png
+    │   ├── task=ObjectNavType,house=714,sub_house_id=2_navigate-to-a-mug_actions.json
+    │   ├── task=ObjectNavType,house=714,sub_house_id=2_navigate-to-a-mug.mp4
+    │   ├── task=ObjectNavType,house=714,sub_house_id=2_navigate-to-a-mug.mp4_topdown.png
+    │   ├── task=ObjectNavType,house=1095,sub_house_id=1_search-for-a-basketball_actions.json
+    │   ├── task=ObjectNavType,house=1095,sub_house_id=1_search-for-a-basketball.mp4
+    │   └── task=ObjectNavType,house=1095,sub_house_id=1_search-for-a-basketball.mp4_topdown.png
+    │
+    ├── 11_12_2025_07_48_11_031700/
+    │   │   # 另一次评估运行的目录。注意：这次运行没有生成 _actions.json 文件，说明保存动作的逻辑在该次运行时未被触发。
+    │   │
+    │   ├── wandb/
+    │   ├── task=ObjectNavType,house=420,sub_house_id=0_find-a-mug.mp4
+    │   ├── task=ObjectNavType,house=420,sub_house_id=0_find-a-mug.mp4_topdown.png
+    │   ├── task=ObjectNavType,house=714,sub_house_id=2_navigate-to-a-mug.mp4
+    │   ├── task=ObjectNavType,house=714,sub_house_id=2_navigate-to-a-mug.mp4_topdown.png
+    │   ├── task=ObjectNavType,house=1095,sub_house_id=1_search-for-a-basketball.mp4
+    │   └── task=ObjectNavType,house=1095,sub_house_id=1_search-for-a-basketball.mp4_topdown.png
+    │
+    └── 11_12_2025_07_51_25_090783/
+        │   # 最新的一次评估运行目录。
+        │
+        └── wandb/+
+```
+

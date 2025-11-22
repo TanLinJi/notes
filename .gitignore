@@ -1,0 +1,12 @@
+# 忽略数据集压缩包
+*.tar.gz
+# 忽略 PyTorch 模型权重文件
+*.pth
+# 忽略备份文件
+*.bak
+
+# 或者针对特定目录忽略
+pytorch深度学习/DeepLearning_tuidui/datasets/
+pytorch深度学习/DeepLearning_tuidui/ckpt/*.pth
+*.tfevents*
+datasets/
