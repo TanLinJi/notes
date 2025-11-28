@@ -45,3 +45,29 @@ python /root/autodl-tmp/keep_gpu_busy.py --utilization 20
   nohup python /root/autodl-tmp/keep_gpu_busy.py --utilization 20 --tensor-size 25000 > /dev/null 2>&1 &
   ```
 
+### tmux的使用
+
+```bash
+sudo apt update  # 更新软件源
+sudo apt install tmux -y  # 安装 tmux
+
+# 1. 创建一个新会话（例如命名为 "my_program"）
+tmux new -s my_program
+
+# 2. 在新会话中，正常运行你的代码（例如 Python 脚本）
+python3 your_script.py  # 或其他运行命令
+
+# 3. 当需要暂时断开连接（比如本地电脑要休眠/关机）：
+# 按键盘组合键：Ctrl + B → 松开后再按 D（detach 会话，程序后台继续运行）
+
+# 4. 之后重新连接服务器后，想查看程序状态：
+tmux attach -t my_program  # 重新进入会话
+
+# 5. 若忘记会话名称，可先列出所有会话：
+tmux ls  # 输出类似：my_program: 1 windows (created ...)
+
+# 6. 若要彻底结束会话（程序会终止）：
+# 进入会话后输入 exit 并回车，或在外部执行：
+tmux kill-session -t my_program
+```
+
