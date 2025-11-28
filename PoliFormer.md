@@ -1134,3 +1134,48 @@ python training/online/online_eval.py   --output_basedir resultstext_box_nav   -
         └── wandb/+
 ```
 
+
+
+
+
+数据集层次：
+	fifteen_type：数据集类型，表示15种对象（如苹果、椅子等）。
+	ObjectNavType：任务类型，表示对象导航任务。
+	train：训练集（还有val验证集）。
+	<HOUSEID>：房屋ID，如000001，表示一个具体的3D房屋场景（从ProcTHOR-Objaverse生成）
+每个房屋文件夹：包含该房屋中所有episodes的数据。一个房屋可能有多个episodes（任务实例），每个episode是一个独立的导航任务。
+
+文件夹000001中的内容：
+
+- hdf5_sensors.hdf5：HDF5文件，存储所有episodes的传感器数据。
+	- 作用：存储所有非视频传感器数据，如位置、动作、奖励、任务信息等。
+	- 结构：按episode分组，每个episode包含时间步序列（timesteps）。例如，episode 0有多个timesteps，每个timestep记录：
+		- 观测：RGB图像（但视频是MP4，这里存储其他传感器如边界框、文本）。
+		- 动作：代理执行的动作（如"MoveAhead"）。
+		- 奖励：执行动作后的奖励。
+		- 状态：代理位置、对象位置等。
+- raw_manipulation_camera__<EPISODE_NUMBER>.mp4：操作摄像头视频，10个（0-9）。
+	- 作用：操作摄像头的视频录制，用于episode <EPISODE_NUMBER>。
+	- 视角：从Stretch机器人的操作摄像头（抓取视角）录制的RGB视频流。
+	- 内容：整个episode的帧序列，帧率通常30FPS。用于可视化或离线分析。
+- raw_navigation_camera__<EPISODE_NUMBER>.mp4：导航摄像头视频，10个（0-9）。
+	- 作用：导航摄像头的视频录制，用于episode <EPISODE_NUMBER>。
+	- 视角：从导航摄像头（探索视角）录制的RGB视频流。
+	- 内容：类似操作摄像头，但用于导航决策。
+- 共有10 + 10 个视频，这表示房屋000001有10个episodes（编号0到9），每个episode有对应的视频和传感器数据。
+- success.txt：
+	
+	- 作用：记录episodes的成功状态（如哪些episode成功完成任务）
+- 操作摄像头视频 和 导航摄像头视频 是Stretch机器人的两个独立摄像头视角，用于不同目的，但都在同一个episode中同步记录。
+- 每个episode都应该有这两个摄像头视频，
+	- 导航摄像头：探索视角，用于导航决策。视频显示机器人移动时的宽视野，帮助感知房间布局、障碍物和目标对象的位置。
+	- 操作摄像头：精细视角，用于抓取/操作。视频聚焦于机器人手臂附近的区域，帮助执行如拾取对象的动作。
+
+- 20个视频（10个导航 + 10个操作）对应10个episodes。每个episode有2个视频（导航和操作视角）。
+- 一个episode是一个完整的导航任务实例（从开始到结束，执行动作序列，直到成功/失败/超时）
+视频关系：每个episode独立，有自己的 raw_navigation_camera__<EPISODE_NUMBER>.mp4 和 raw_manipulation_camera__<EPISODE_NUMBER>.mp4。
+例如：
+- Episode 0：raw_navigation_camera__0.mp4 + raw_manipulation_camera__0.mp4
+- Episode 1：raw_navigation_camera__1.mp4 + raw_manipulation_camera__1.mp4
+
+  
