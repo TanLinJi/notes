@@ -114,113 +114,112 @@ configs/
 #### 2.1.1 PointPillars
 
 ```text
-├── README.md  # 目录说明文档：介绍配置文件的版本限制（如MMCV版本）、链接更新等整体信息
-├── metafile.yml   # 元数据文件：存储配置的元信息（如支持的数据集、依赖版本等），与README同步更新目的
-├── `pointpillars_hv_fpn_sbn-all_8xb2-2x_lyft-3d-range100.py`  # PointPillars配置
-│   ├── 模型：PointPillars（点云分pillars处理的3D检测模型）
-│   ├── 方向：hv（处理水平+垂直方向目标）
-│   ├── Neck：fpn（Feature Pyramid Network，特征金字塔融合）
-│   ├── 归一化：sbn-all（所有层用SyncBN，多GPU同步批归一化）
-│   ├── 训练：8xb2-2x（8张GPU，每张batch=2，训练2个epoch）
-│   ├── 数据集：lyft-3d（Lyft 3D检测数据集）
-│   └── 范围：range100（检测100米内目标）
-├── `pointpillars_hv_fpn_sbn-all_8xb2-2x_lyft-3d.py`  # PointPillars配置（Lyft数据集，无100米范围限制）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：fpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：8xb2-2x
-│   └── 数据集：lyft-3d（默认检测范围）
-├── `pointpillars_hv_fpn_sbn-all_8xb2-amp-2x_nus-3d.py`  # PointPillars配置（nuScenes数据集，混合精度训练）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：fpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：8xb2-amp-2x（8张GPU，每张batch=2，AMP混合精度，训练2个epoch）
-│   └── 数据集：nus-3d（nuScenes 3D检测数据集）
-├── `pointpillars_hv_fpn_sbn-all_8xb4-2x_nus-3d.py`  # PointPillars配置（nuScenes数据集，更大batch）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：fpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：8xb4-2x（8张GPU，每张batch=4，训练2个epoch）
-│   └── 数据集：nus-3d
-├── `pointpillars_hv_secfpn_bbox-6e-160e_kitti-3d-class.py`  # PointPillars配置（KITTI数据集，多类别检测）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：secfpn（Second FPN，改进的特征金字塔融合）
-│   ├── 训练：bbox-6e-160e（训练160个epoch，bbox损失相关配置）
-│   ├── 数据集：kitti-3d（KITTI 3D检测数据集）
-│   └── 任务：3d-class（检测所有类别）
-├── `pointpillars_hv_secfpn_bbox-6e-160e_kitti-3d-car.py`  # PointPillars配置（KITTI数据集，仅检测汽车）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：secfpn
-│   ├── 训练：bbox-6e-160e
-│   ├── 数据集：kitti-3d
-│   └── 任务：3d-car（仅检测汽车类别）
-├── `pointpillars_hv_secfpn_sbn-all_16xb2-2x_waymo-3d-class.py`  # PointPillars配置（Waymo数据集，多类别检测）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：secfpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：16xb2-2x（16张GPU，每张batch=2，训练2个epoch）
-│   ├── 数据集：waymo-3d（Waymo 3D检测数据集）
-│   └── 任务：3d-class（检测所有类别）
-├── `pointpillars_hv_secfpn_sbn-all_16xb2-2x_waymo-3d-car.py`  # PointPillars配置（Waymo数据集，仅检测汽车）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：secfpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：16xb2-2x
-│   ├── 数据集：waymo-3d
-│   └── 任务：3d-car（仅检测汽车类别）
-├── `pointpillars_hv_secfpn_sbn-all_16xb2-2x_waymoD5-3d-class.py`  # PointPillars配置（Waymo D5子集，多类别检测）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：secfpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：16xb2-2x
-│   ├── 数据集：waymoD5（Waymo数据集的D5子集）
-│   └── 任务：3d-class（检测所有类别）
-├── `pointpillars_hv_secfpn_sbn-all_16xb2-2x_waymoD5-3d-car.py`  # PointPillars配置（Waymo D5子集，仅检测汽车）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：secfpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：16xb2-2x
-│   ├── 数据集：waymoD5
-│   └── 任务：3d-car（仅检测汽车类别）
-├── `pointpillars_hv_secfpn_sbn-all_8xb2-2x_lyft-3d-range100.py`  # PointPillars配置（Lyft数据集，secFPN+100米范围）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：secfpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：8xb2-2x
-│   ├── 数据集：lyft-3d
-│   └── 范围：range100（检测100米内目标）
-├── `pointpillars_hv_secfpn_sbn-all_8xb2-2x_lyft-3d.py`  # PointPillars配置（Lyft数据集，secFPN，无100米限制）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：secfpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：8xb2-2x
-│   └── 数据集：lyft-3d（默认检测范围）
-├── `pointpillars_hv_secfpn_sbn-all_8xb2-amp-2x_nus-3d.py`  # PointPillars配置（nuScenes数据集，secFPN+混合精度）
-│   ├── 模型：PointPillars
-│   ├── 方向：hv
-│   ├── Neck：secfpn
-│   ├── 归一化：sbn-all
-│   ├── 训练：8xb2-amp-2x（AMP混合精度）
-│   └── 数据集：nus-3d
-└── `pointpillars_hv_secfpn_sbn-all_8xb4-2x_nus-3d.py`  # PointPillars配置（nuScenes数据集，secFPN+更大batch）
-├── 模型：PointPillars
-├── 方向：hv
-├── Neck：secfpn
-├── 归一化：sbn-all
-├── 训练：8xb4-2x（8张GPU，每张batch=4）
-└── 数据集：nus-3d
+configs/pointpillars/                                      # PointPillars 算法相关的所有配置
+├── README.md                                              # 本目录下配置的说明文档 (英文)
+│                                                          # - 介绍 PointPillars 在各数据集上的设置与复现结果
+│
+├── metafile.yml                                           # 模型元信息索引文件
+│                                                          # - 供 OpenMMLab 模型库/网页展示使用
+│                                                          # - 记录每个配置对应的权重下载地址、指标 (mAP 等)
+│
+├── pointpillars_hv_fpn_sbn-all_8xb2-2x_lyft-3d-range100.py
+│   # PointPillars + FPN，Lyft 数据集，检测距离 100m
+│   # - hv: 硬体素化
+│   # - fpn: 使用 FPN 作为 Neck
+│   # - sbn-all: 全网络使用 SyncBN
+│   # - 8xb2: 8 卡，每卡 batch=2，总 batch=16
+│   # - 2x: 训练时长为标准 schedule 的 2 倍
+│   # - lyft-3d-range100: Lyft 3D 检测，半径 100m 范围
+│
+├── pointpillars_hv_fpn_sbn-all_8xb2-2x_lyft-3d.py
+│   # PointPillars + FPN，Lyft 数据集，普通 3D 检测设置
+│   # - 与上一个配置类似，但不限制到 range100 (或使用默认范围)
+│
+├── pointpillars_hv_fpn_sbn-all_8xb2-amp-2x_nus-3d.py
+│   # PointPillars + FPN，nuScenes 数据集，使用混合精度训练
+│   # - amp: 开启自动混合精度 (可加速训练并节省显存)
+│   # - nus-3d: nuScenes 3D 检测任务
+│
+├── pointpillars_hv_fpn_sbn-all_8xb4-2x_nus-3d.py
+│   # PointPillars + FPN，nuScenes 数据集，标准精度训练
+│   # - 8xb4: 8 卡，每卡 batch=4，总 batch=32
+│   # - 2x: 较长的训练 schedule
+│
+├── pointpillars_hv_secfpn_8xb6-160e_kitti-3d-3class.py
+│   # PointPillars + SECOND 风格 FPN，在 KITTI 上做 3 类 3D 检测
+│   # - secfpn: 使用 SECOND 类型的 FPN 结构
+│   # - 8xb6: 8 卡，每卡 batch=6，总 batch=48
+│   # - 160e: 训练 160 个 epochs，适合从头训练
+│   # - kitti-3d-3class: Car / Pedestrian / Cyclist 三类
+│   # 用途：
+│   # - 作为 3 类检测的标准配置，复现论文或基线结果
+│
+├── pointpillars_hv_secfpn_8xb6-160e_kitti-3d-car.py
+│   # PointPillars + SECOND FPN，在 KITTI 上只检测 Car
+│   # - 在上一份 3class 配置的基础上，修改类别为单类 Car
+│   # 典型用途：
+│   # - 专注车辆检测任务 (如自动驾驶仅关心车)
+│   # - 训练时间、结构基本与 3 类版本一致
+│
+├── pointpillars_hv_secfpn_sbn-all_16xb2-2x_waymo-3d-3class.py
+│   # PointPillars + SECOND FPN，在 Waymo 上做 3 类 3D 检测 (旧式 Waymo 配置)
+│   # - 16xb2: 16 卡，每卡 batch=2，总 batch=32
+│   # - 2x: 2 倍标准训练时长
+│   # - waymo-3d-3class: Waymo 三类检测 (如 Vehicle / Pedestrian / Cyclist)
+│
+├── pointpillars_hv_secfpn_sbn-all_16xb2-2x_waymo-3d-car.py
+│   # 同上，但在 Waymo 上只检测 Car (车辆)
+│   # - 适用于只关心车辆的场景
+│
+├── pointpillars_hv_secfpn_sbn-all_16xb2-2x_waymoD5-3d-3class.py
+│   # PointPillars + SECOND FPN，Waymo D5 版本，3 类检测
+│   # - waymoD5: Waymo 数据集，按 D5 策略抽帧/处理 (如每 5 帧采样一帧)
+│   # - 其他设置与前面的 Waymo 3-class 类似
+│   # 用途：
+│   # - 面向 D5 采样策略的官方基线
+│
+├── pointpillars_hv_secfpn_sbn-all_16xb2-2x_waymoD5-3d-car.py
+│   # PointPillars + SECOND FPN，Waymo D5 版本，只检测 Car
+│   # - 适用于 D5 子集上，以车辆为主的实验
+│
+├── pointpillars_hv_secfpn_sbn-all_8xb2-2x_lyft-3d-range100.py
+│   # PointPillars + SECOND FPN，Lyft 数据集，检测范围 100m
+│   # - 与 FPN 版本区别：这里 backbone+neck 使用 SECOND 风格
+│   # - 8xb2: 8 卡 batch=2
+│
+├── pointpillars_hv_secfpn_sbn-all_8xb2-2x_lyft-3d.py
+│   # PointPillars + SECOND FPN，Lyft 数据集，普通 3D 检测设置
+│   # - 不限制到 range100，或使用默认的检测范围
+│
+├── pointpillars_hv_secfpn_sbn-all_8xb2-amp-2x_nus-3d.py
+│   # PointPillars + SECOND FPN，nuScenes 数据集，混合精度训练
+│   # - 与非 amp 版本相比，只是在训练环节打开 AMP
+│
+└── pointpillars_hv_secfpn_sbn-all_8xb4-2x_nus-3d.py
+    # PointPillars + SECOND FPN，nuScenes 数据集，标准精度训练
+    # - 8xb4: 8 卡，每卡 batch=4，总 batch=32
+    # - 2x: 2 倍训练时长
+    # - nus-3d: nuScenes 3D 检测
 ```
+
+`1 关于NECK解释`
+
+“使用 FPN 作为 Neck” 可以拆开理解：
+
+- **Backbone（主干）**：负责从输入（图像/点云）里提取特征，比如 ResNet、SECOND backbone。
+- **Head（检测头）**：负责在特征图上做分类、回归，输出目标框和类别。
+- **Neck（颈部）**：夹在 Backbone 和 Head 中间，用来**加工与融合特征**。
+
+**FPN = Feature Pyramid Network（特征金字塔网络）**：
+
+- 它把 Backbone 不同层级（高分辨率、低语义；低分辨率、高语义）的特征图拿出来，
+- 通过自顶向下 + 横向连接的方式，把多尺度特征融合，
+- 输出一组多尺度的特征图（一般是 P3, P4, P5...），再交给 Head 使用。
+
+“使用 FPN 作为 Neck” 就是说：
+在 Backbone 和 检测头之间，插入一个 FPN 模块，
+让 Head 不是只用单一尺度的特征，而是用 **多尺度融合后的特征**，
+这样对大物体、小物体都更友好，检测效果通常更好。
 
 在深度学习中，**Neck** 是模型架构中连接 **Backbone**（骨干网络，负责特征提取）与 **Head**（检测头，负责预测目标位置和类别） 的中间模块，核心作用是**多尺度特征融合**，让模型同时利用 “浅层特征的空间细节” 和 “深层特征的语义信息”，提升检测精度（尤其是小目标和多尺度目标）。
 
@@ -228,6 +227,40 @@ configs/
 
 - **FPN**：通过 “自顶向下” 路径，将深层语义特征传递到浅层，增强小目标检测能力。
 - **secFPN**：基于 FPN 改进，增加 “自底向上” 路径，同时传递浅层细节到深层，进一步优化多尺度特征的一致性。
+
+`2 关于HV 硬体素化解释`
+
+- 在点云中，**体素化（voxelization）**就是把连续的 3D 空间切成很多规则小立方体（voxel），然后把每个 voxel 里的点聚在一起做特征。
+- **hv = hard voxelization（硬体素化）** 的“硬”指的是：
+  对每个 voxel 内部的点数，设置**硬上限**，超出的点直接丢弃；同时 voxel 总数也有上限，多出来的 voxel 也会被丢掉或忽略。
+
+更具体一点：
+
+- 你会在配置里看到类似：
+  - `max_num_points_per_voxel = 32`（每个 voxel 最多 32 个点）
+  - `max_voxels = 16000`（一帧最多保留 16000 个 voxel）
+- 硬体素化过程：
+  1. 把点按照坐标分到各自 voxel 里。
+  2. 如果一个 voxel 里有 80 个点，只保留前 32 个，其余 48 个**不再参与后续计算**。
+  3. 如果一帧产生了 30000 个 voxel，只保留前 16000 个，其余的 voxel 整个丢弃。
+
+这样做的目的：
+
+- **稳定显存和计算量**：每一帧进入网络的 voxel 数、每个 voxel 的点数都是有固定上限的，便于 GPU 批处理。
+- 代价是：会损失一部分点云信息，但通常对检测精度影响不大，是 PointPillars / SECOND 等模型里常用做法。
+
+`3 关于sbn-all解释`
+
+`sbn-all` 里的 **sbn = SyncBatchNorm（同步 BatchNorm）**，`all` 表示**全网络所有 BatchNorm 层都换成 SyncBN**。
+
+含义可以拆成两点：
+
+1. **普通 BatchNorm（BN）怎么做？**
+   - 每块 GPU 只用**自己这块卡上的 mini-batch** 计算均值/方差。
+   - 如果你 8 卡训练，每卡 batch=2，其实 BN 看到的 batch size 只有 2，统计量很不稳定。
+2. **SyncBN（同步 BN）怎么做？**
+   - 多块 GPU 之间会通信，把各自的均值/方差**汇总起来共同计算**。
+   - 例如 8 卡 × 2 = 16 的有效 batch size，用这 16 个样本的统计量来做 BN，结果更稳定，尤其在 3D 检测这类 batch 很小的任务里很重要。
 
 ### 2.2 Demo
 
