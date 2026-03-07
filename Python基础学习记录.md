@@ -2042,8 +2042,6 @@ with open('.//FileOP//pi_digits.txt') as file_object:
       file_obj.write('I love creating apps that can run in a browser.\n')
   ```
 
-
-
 ## 第13章 异常
 
 - Python使用被称为**异常**的特殊**对象**来管理程序执行期间发生的错误
