@@ -24,3 +24,11 @@
 ![1774790798073](LiDAR-LLM.assets/1774790798073.png)
 
 `图 1：LiDAR-LLM 的特性。我们提出的 LiDAR-LLM 以 3D 激光雷达数据作为输入，并将 3D 模态与 语言嵌入空间 (Language Embedding Space) 进行对齐，利用 LLMs 卓越的推理能力来理解户外 3D 场景。底部展示了源自我们生成或使用的激光雷达-文本数据的示例，涵盖了一系列与 3D 相关的任务。`
+
+
+
+
+
+### Conclusion
+
+总而言之，本文代表了一项开创性的工作，旨在释放**大语言模型 (LLMs)** 的推理能力，以理解户外的**激光雷达数据 (LiDAR Data)**。为了训练 LiDAR-LLM，我们生成了一套全面的激光雷达-文本配对数据集，其中包含 42 万条**3D字幕生成 (3D Captioning)** 数据和 28 万条**3D定位 (3D Grounding)** 数据。随后，我们引入了一种**三阶段训练策略 (Three-stage Training Strategy)**，逐步将激光雷达模态与 LLM 的**语言嵌入空间 (Language Embedding Space)** 进行对齐。我们的架构创新引入了**位置感知 Transformer (Position-Aware Transformer)** 来连接 3D 编码器与 LLM。通过在我们生成的数据集和开源数据集上进行的广泛实验，我们的 LiDAR-LLM 在各种任务中展现出了极具前景的性能，这些任务包括 3D 字幕生成、3D 定位、**3D问答 (3D Question Answering)**、**自动驾驶规划 (Autonomous Driving Planning)** 以及一系列**高级指令任务 (High-level Instruction Tasks)**。
