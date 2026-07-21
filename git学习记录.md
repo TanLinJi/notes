@@ -476,4 +476,90 @@ A  src/data/tools/sam2/gui/checkpoints/sam2.1_hiera_large.pt
   $ git checkout -- licenes.txt
   ```
 
-  
+
+### commit 说明
+
+`feat` 是 Git 提交信息中的类型标记，来自常用的 Conventional Commits（约定式提交）规范，表示：
+
+> `feat` = feature，即新增功能。
+
+例如：
+
+```bash
+git commit -m "feat: add basic API error handling"
+```
+
+含义是：
+
+> 新增基础 API 异常处理功能。
+
+标准格式通常是：
+
+```text
+<类型>(<可选范围>): <简短说明>
+```
+
+例如：
+
+```text
+feat: add basic API error handling
+feat(client): add API error handling
+```
+
+常用类型如下：
+
+| 类型       | 含义                     | 示例                                  |
+| ---------- | ------------------------ | ------------------------------------- |
+| `feat`     | 新增功能                 | `feat: add multi-turn conversation`   |
+| `fix`      | 修复错误                 | `fix: handle empty model response`    |
+| `refactor` | 重构代码，不改变功能     | `refactor: separate LLM client logic` |
+| `docs`     | 只修改文档               | `docs: update project structure`      |
+| `test`     | 新增或修改测试           | `test: add empty response test`       |
+| `chore`    | 日常维护、配置整理       | `chore: update dependencies`          |
+| `style`    | 格式调整，不影响程序逻辑 | `style: format client module`         |
+| `perf`     | 性能优化                 | `perf: reduce API request overhead`   |
+| `build`    | 构建系统或依赖变化       | `build: upgrade openai package`       |
+| `ci`       | CI/CD 配置变化           | `ci: add GitHub Actions workflow`     |
+
+你目前出现过的几种提交可以这样理解：
+
+```text
+chore: save working project baseline
+```
+
+保存项目基线，主要属于维护操作。
+
+```text
+refactor: separate environment configuration
+```
+
+拆分配置模块，但没有增加新功能。
+
+```text
+refactor: separate LLM client logic
+```
+
+调整代码结构，程序功能保持不变。
+
+```text
+feat: add basic API error handling
+```
+
+让程序具备鉴权失败、网络异常、空响应等处理能力，属于新增功能。
+
+这些不是 Git 强制规定，Git 不会检查你是否使用了 `feat`。它们是一套团队协作惯例，主要帮助人快速理解提交内容，也便于以后自动生成版本记录。
+
+对我们这个学习项目，建议遵循以下简单规则：
+
+- 类型使用小写，如 `feat`，不要写成 `Feat`。
+- 冒号后保留一个空格。
+- 一次提交尽量只完成一类改动。
+- 描述保持简短，通常不用句号。
+- 提交说明统一使用英文或中文，当前项目建议继续统一使用英文。
+- README 随代码一同更新时，提交类型由主要改动决定；本次主要是新增异常处理，所以仍用 `feat`，不必单独写成 `docs`。
+
+因此，本次命令是合理的：
+
+```bash
+git commit -m "feat: add basic API error handling"
+```
